@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats PRF</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-basketball-ball"></i> PRF</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="exportBtn" title="Exporter les données">
+                        <i class="fas fa-download"></i> Exporter
+                    </button>
+                    <label for="importFile" class="btn btn-secondary" title="Importer des données">
+                        <i class="fas fa-upload"></i> Importer
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                    </label>
+                    <button class="btn btn-secondary" id="clearDataBtn" title="Effacer toutes les données">
+                        <i class="fas fa-trash"></i> Effacer
+                    </button>
+                    <button class="btn btn-primary" id="addMatchBtn">
+                        <i class="fas fa-plus"></i> Ajouter un match
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-btn active" data-tab="players">
+                <i class="fas fa-users"></i> Joueuses
+            </button>
+            <button class="nav-btn" data-tab="team">
+                <i class="fas fa-chart-line"></i> Équipe
+            </button>
+            <button class="nav-btn" data-tab="matches">
+                <i class="fas fa-calendar"></i> Matchs
+            </button>
+        </nav>
+
+        <!-- Contenu principal -->
+        <main class="main">
+            <!-- Section Joueuses -->
+            <section id="players" class="tab-content active">
+                <div class="section-header">
+                    <h2>Statistiques des Joueuses</h2>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="playerSearch" placeholder="Rechercher une joueuse...">
+                    </div>
+                </div>
+                <div class="players-grid" id="playersGrid">
+                    <!-- Les cartes des joueuses seront générées par JavaScript -->
+                </div>
+                
+                <!-- Section Graphiques Joueuses -->
+                <div class="player-charts-section">
+                    <div class="section-header">
+                        <h2>Évolution individuelle</h2>
+                    </div>
+                    <div class="player-chart-controls">
+                        <div class="player-selector">
+                            <label for="playerSelect">Sélectionner une joueuse :</label>
+                            <select id="playerSelect">
+                                <option value="">-- Choisir une joueuse --</option>
+                            </select>
+                        </div>
+                        <div class="chart-option-player">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="showHistograms" checked>
+                                <span class="checkmark-simple"></span>
+                                Afficher les histogrammes
+                            </label>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="playerPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Équipe -->
+            <section id="team" class="tab-content">
+                <div class="section-header">
+                    <h2>Statistiques de l'Équipe</h2>
+                </div>
+                <div class="team-stats" id="teamStats">
+                    <!-- Les statistiques d'équipe seront générées par JavaScript -->
+                </div>
+                
+                <!-- Section Graphiques -->
+                <div class="charts-section">
+                    <div class="section-header">
+                        <h2>Évolution des performances</h2>
+                    </div>
+                    <div class="chart-controls">
+                        <div class="chart-options">
+                            <label class="chart-option">
+                                <input type="checkbox" id="chart-points-scored" value="points-scored" checked>
+                                <span class="checkmark" style="background-color: #3b82f6;"></span>
+                                Points marqués/match
+                            </label>
+                            <label class="chart-option">
+                                <input type="checkbox" id="chart-points-conceded" value="points-conceded">
+                                <span class="checkmark" style="background-color: #ef4444;"></span>
+                                Points encaissés/match
+                            </label>
+                            <label class="chart-option">
+                                <input type="checkbox" id="chart-free-throws" value="free-throws">
+                                <span class="checkmark" style="background-color: #22c55e;"></span>
+                                % Lancers francs
+                            </label>
+                            <label class="chart-option">
+                                <input type="checkbox" id="chart-ranking" value="ranking">
+                                <span class="checkmark" style="background-color: #f59e0b;"></span>
+                                Classement général
+                            </label>
+                            <label class="chart-option">
+                                <input type="checkbox" id="chart-attack-ranking" value="attack-ranking">
+                                <span class="checkmark" style="background-color: #8b5cf6;"></span>
+                                Classement attaque
+                            </label>
+                            <label class="chart-option">
+                                <input type="checkbox" id="chart-defense-ranking" value="defense-ranking">
+                                <span class="checkmark" style="background-color: #06b6d4;"></span>
+                                Classement défense
+                            </label>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Matchs -->
+            <section id="matches" class="tab-content">
+                <div class="section-header">
+                    <h2>Historique des Matchs</h2>
+                </div>
+                <div class="matches-list" id="matchesList">
+                    <!-- La liste des matchs sera générée par JavaScript -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal pour ajouter un match -->
+    <div class="modal" id="addMatchModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Ajouter un nouveau match</h3>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="matchForm">
+                    <!-- Informations générales du match -->
+                    <div class="form-section">
+                        <h4>Informations du match</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="opponent">Adversaire</label>
+                                <input type="text" id="opponent" name="opponent" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="matchDate">Date</label>
+                                <input type="date" id="matchDate" name="matchDate" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="location">Lieu</label>
+                                <select id="location" name="location" required>
+                                    <option value="domicile">Domicile</option>
+                                    <option value="exterieur">Extérieur</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="result">Résultat</label>
+                                <select id="result" name="result" required>
+                                    <option value="victoire">Victoire</option>
+                                    <option value="defaite">Défaite</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ourScore">Notre score</label>
+                                <input type="number" id="ourScore" name="ourScore" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="opponentScore">Score adversaire</label>
+                                <input type="number" id="opponentScore" name="opponentScore" min="0" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="freeThrowsMade">Lancers francs réussis</label>
+                                <input type="number" id="freeThrowsMade" name="freeThrowsMade" min="0" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="freeThrowsAttempted">Lancers francs tentés</label>
+                                <input type="number" id="freeThrowsAttempted" name="freeThrowsAttempted" min="0" value="0">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ranking">Classement général</label>
+                                <input type="number" id="ranking" name="ranking" min="1" placeholder="ex: 5">
+                            </div>
+                            <div class="form-group">
+                                <label for="attackRanking">Classement attaque</label>
+                                <input type="number" id="attackRanking" name="attackRanking" min="1" placeholder="ex: 3">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="defenseRanking">Classement défense</label>
+                                <input type="number" id="defenseRanking" name="defenseRanking" min="1" placeholder="ex: 7">
+                            </div>
+                            <div class="form-group">
+                                <!-- Champ vide pour l'alignement -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques des joueuses -->
+                    <div class="form-section">
+                        <h4>Statistiques des joueuses</h4>
+                        <div class="players-stats-form" id="playersStatsForm">
+                            <!-- Les champs pour chaque joueuse seront générés par JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelMatch">Annuler</button>
+                        <button type="submit" class="btn btn-primary" id="submitMatchBtn">Enregistrer le match</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
