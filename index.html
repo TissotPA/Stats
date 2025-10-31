@@ -35,8 +35,14 @@
 
         <!-- Navigation -->
         <nav class="nav">
-            <button class="nav-btn active" data-tab="players">
+            <button class="nav-btn active" data-tab="dashboard">
+                <i class="fas fa-home"></i> Accueil
+            </button>
+            <button class="nav-btn" data-tab="players">
                 <i class="fas fa-users"></i> Joueuses
+            </button>
+            <button class="nav-btn" data-tab="comparison">
+                <i class="fas fa-balance-scale"></i> Comparaison
             </button>
             <button class="nav-btn" data-tab="team">
                 <i class="fas fa-chart-line"></i> Équipe
@@ -48,8 +54,75 @@
 
         <!-- Contenu principal -->
         <main class="main">
+            <!-- Section Tableau de bord -->
+            <section id="dashboard" class="tab-content active">
+                <div class="section-header">
+                    <h2>Tableau de bord PRF</h2>
+                    <div class="dashboard-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="currentDate"></span>
+                    </div>
+                </div>
+                
+                <!-- Résumé rapide -->
+                <div class="dashboard-summary">
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-trophy"></i></div>
+                        <div class="summary-content">
+                            <div class="summary-value" id="dashboardRecord">0-0</div>
+                            <div class="summary-label">Bilan saison</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-calendar-check"></i></div>
+                        <div class="summary-content">
+                            <div class="summary-value" id="dashboardMatches">0</div>
+                            <div class="summary-label">Matchs joués</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="summary-content">
+                            <div class="summary-value" id="dashboardAvgPoints">0.0</div>
+                            <div class="summary-label">Points/match</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-star"></i></div>
+                        <div class="summary-content">
+                            <div class="summary-value" id="dashboardTopPlayer">-</div>
+                            <div class="summary-label">Top scoreuse</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Derniers matchs -->
+                <div class="dashboard-section">
+                    <h3><i class="fas fa-history"></i> Derniers matchs</h3>
+                    <div class="recent-matches" id="recentMatches">
+                        <!-- Généré par JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Performances récentes -->
+                <div class="dashboard-section">
+                    <h3><i class="fas fa-fire"></i> Performances récentes</h3>
+                    <div class="performance-highlights" id="performanceHighlights">
+                        <!-- Généré par JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Graphique tendance rapide -->
+                <div class="dashboard-section">
+                    <h3><i class="fas fa-chart-area"></i> Tendance récente</h3>
+                    <div class="quick-chart-container">
+                        <canvas id="dashboardChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
             <!-- Section Joueuses -->
-            <section id="players" class="tab-content active">
+            <section id="players" class="tab-content">
                 <div class="section-header">
                     <h2>Statistiques des Joueuses</h2>
                     <div class="search-box">
@@ -83,6 +156,69 @@
                     </div>
                     <div class="chart-container">
                         <canvas id="playerPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Comparaison -->
+            <section id="comparison" class="tab-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-balance-scale"></i> Comparaison entre Joueuses</h2>
+                    <p class="section-description">Comparez les performances de 2 à 3 joueuses côte à côte</p>
+                </div>
+                
+                <!-- Sélection des joueuses -->
+                <div class="comparison-controls">
+                    <div class="player-selectors">
+                        <div class="player-selector-group">
+                            <label for="comparePlayer1">Joueuse 1 :</label>
+                            <select id="comparePlayer1" class="comparison-select">
+                                <option value="">-- Sélectionner --</option>
+                            </select>
+                        </div>
+                        <div class="player-selector-group">
+                            <label for="comparePlayer2">Joueuse 2 :</label>
+                            <select id="comparePlayer2" class="comparison-select">
+                                <option value="">-- Sélectionner --</option>
+                            </select>
+                        </div>
+                        <div class="player-selector-group">
+                            <label for="comparePlayer3">Joueuse 3 (optionnelle) :</label>
+                            <select id="comparePlayer3" class="comparison-select">
+                                <option value="">-- Sélectionner --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="resetComparison" class="btn btn-secondary">
+                        <i class="fas fa-refresh"></i> Réinitialiser
+                    </button>
+                </div>
+
+                <!-- Message d'état -->
+                <div id="comparisonMessage" class="comparison-message">
+                    <i class="fas fa-info-circle"></i>
+                    Sélectionnez au moins 2 joueuses pour commencer la comparaison
+                </div>
+
+                <!-- Graphique radar -->
+                <div id="comparisonRadarSection" class="comparison-section" style="display: none;">
+                    <div class="section-header">
+                        <h3><i class="fas fa-chart-area"></i> Comparaison visuelle</h3>
+                    </div>
+                    <div class="radar-chart-container">
+                        <canvas id="comparisonRadarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tableau de comparaison -->
+                <div id="comparisonTableSection" class="comparison-section" style="display: none;">
+                    <div class="section-header">
+                        <h3><i class="fas fa-table"></i> Comparaison détaillée</h3>
+                    </div>
+                    <div class="comparison-table-container">
+                        <table id="comparisonTable" class="comparison-table">
+                            <!-- Généré par JavaScript -->
+                        </table>
                     </div>
                 </div>
             </section>
