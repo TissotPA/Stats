@@ -74,6 +74,16 @@ function clearAllData() {
     }
 }
 
+// Fonction helper pour calculer l'écart-type
+function calculateStandardDeviation(values) {
+    if (values.length === 0) return 0;
+    if (values.length === 1) return 0;
+    
+    const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    return Math.sqrt(variance);
+}
+
 // Initialisation des joueuses (avec vos vraies joueuses)
 function initializePlayers() {
     players = [
@@ -304,8 +314,9 @@ function switchTab(tab) {
     } else if (tab === 'players') {
         setTimeout(() => {
             populatePlayerSelect();
-            updatePlayerChart();
         }, 100);
+    } else if (tab === 'evolution') {
+        setTimeout(() => initializeEvolution(), 100);
     }
 }
 
@@ -320,6 +331,7 @@ function renderDashboard() {
     updateRecentMatches();
     updatePerformanceHighlights();
     updateDashboardChart();
+    updateLeadersGrid();
     updateCurrentDate();
 }
 
@@ -624,6 +636,113 @@ function updateDashboardChart() {
     });
 }
 
+// Mise à jour de la grille des leaders
+function updateLeadersGrid() {
+    const leadersGrid = document.getElementById('leadersGrid');
+    if (!leadersGrid) return;
+    
+    const leaders = calculateStatLeaders();
+    
+    // Définir toutes les statistiques avec leurs labels
+    const statsDefinitions = [
+        { key: 'matches', label: 'Matchs joués', format: 'number' },
+        { key: 'points', label: 'Points totaux', format: 'number' },
+        { key: 'minutes', label: 'Minutes totales', format: 'number' },
+        { key: 'pointsPerMatch', label: 'Points/match', format: 'decimal1' },
+        { key: 'minutesPerMatch', label: 'Minutes/match', format: 'decimal1' },
+        { key: 'pointsPerMinute', label: 'Points/minute', format: 'decimal3' },
+        { key: 'pointsRegularity', label: 'Régularité points', format: 'decimal1', inverted: true },
+        { key: 'minutesRegularity', label: 'Régularité minutes', format: 'decimal1', inverted: true },
+        { key: 'fouls', label: 'Fautes/match', format: 'decimal1', inverted: true },
+        { key: 'foulsRegularity', label: 'Régularité fautes', format: 'decimal1', inverted: true }
+    ];
+    
+    let html = '';
+    
+    statsDefinitions.forEach(stat => {
+        const leaderId = leaders[stat.key]?.[0];
+        if (!leaderId) return;
+        
+        const leader = players.find(p => p.id === leaderId);
+        if (!leader) return;
+        
+        let value;
+        switch (stat.key) {
+            case 'matches':
+                value = leader.matches || 0;
+                break;
+            case 'points':
+                value = leader.points || 0;
+                break;
+            case 'minutes':
+                value = leader.minutes || 0;
+                break;
+            case 'pointsPerMatch':
+                value = (leader.matches > 0) ? (leader.points || 0) / leader.matches : 0;
+                break;
+            case 'minutesPerMatch':
+                value = (leader.matches > 0) ? (leader.minutes || 0) / leader.matches : 0;
+                break;
+            case 'pointsPerMinute':
+                value = (leader.minutes > 0) ? (leader.points || 0) / leader.minutes : 0;
+                break;
+            case 'pointsRegularity':
+                const playerPointsMatches = matches.filter(match => 
+                    match.playerStats[leader.id] && match.playerStats[leader.id].played
+                );
+                const pointsArray = playerPointsMatches.map(match => match.playerStats[leader.id].points);
+                value = calculateStandardDeviation(pointsArray);
+                break;
+            case 'minutesRegularity':
+                const playerMinutesMatches = matches.filter(match => 
+                    match.playerStats[leader.id] && match.playerStats[leader.id].played
+                );
+                const minutesArray = playerMinutesMatches.map(match => match.playerStats[leader.id].minutes);
+                value = calculateStandardDeviation(minutesArray);
+                break;
+            case 'fouls':
+                value = (leader.matches > 0) ? (leader.fouls || 0) / leader.matches : 0;
+                break;
+            case 'foulsRegularity':
+                const playerFoulsMatches = matches.filter(match => 
+                    match.playerStats[leader.id] && match.playerStats[leader.id].played
+                );
+                const foulsArray = playerFoulsMatches.map(match => match.playerStats[leader.id].fouls || 0);
+                value = calculateStandardDeviation(foulsArray);
+                break;
+            default:
+                value = 0;
+        }
+        
+        let formattedValue;
+        switch (stat.format) {
+            case 'decimal1':
+                formattedValue = value.toFixed(1);
+                break;
+            case 'decimal3':
+                formattedValue = value.toFixed(3);
+                break;
+            case 'number':
+                formattedValue = value.toString();
+                break;
+            default:
+                formattedValue = value.toString();
+        }
+        
+        html += `
+            <div class="leader-item">
+                <div class="leader-info">
+                    <div class="leader-stat">${stat.label}</div>
+                    <div class="leader-value">${formattedValue}</div>
+                </div>
+                <div class="leader-player">${leader.prenom}</div>
+            </div>
+        `;
+    });
+    
+    leadersGrid.innerHTML = html;
+}
+
 // ===== FONCTIONS DE COMPARAISON =====
 
 // Initialisation de la section comparaison
@@ -828,10 +947,13 @@ function updateComparisonRadar() {
         { label: 'Matchs joués', key: 'matches' },
         { label: 'Points/match', key: 'pointsPerMatch' },
         { label: 'Minutes/match', key: 'minutesPerMatch' },
+        { label: 'Régularité pts.', key: 'pointsRegularity' },
+        { label: 'Régularité min.', key: 'minutesRegularity' },
         { label: 'Points/minute', key: 'pointsPerMinute' },
         { label: 'Points totaux', key: 'points' },
         { label: 'Minutes totales', key: 'minutes' },
-        { label: 'Fautes/match', key: 'foulsPerMatch' }
+        { label: 'Fautes/match', key: 'foulsPerMatch' },
+        { label: 'Régularité fautes', key: 'foulsRegularity' }
     ];
     
     // Calculer les valeurs normalisées pour chaque joueuse
@@ -860,13 +982,35 @@ function updateComparisonRadar() {
                 case 'foulsPerMatch':
                     value = (player.matches > 0) ? (player.fouls || 0) / player.matches : 0;
                     break;
+                case 'pointsRegularity':
+                    const playerPointsMatches = matches.filter(match => 
+                        match.playerStats[player.id] && match.playerStats[player.id].played
+                    );
+                    const pointsArray = playerPointsMatches.map(match => match.playerStats[player.id].points);
+                    value = calculateStandardDeviation(pointsArray);
+                    break;
+                case 'minutesRegularity':
+                    const playerMinutesMatches = matches.filter(match => 
+                        match.playerStats[player.id] && match.playerStats[player.id].played
+                    );
+                    const minutesArray = playerMinutesMatches.map(match => match.playerStats[player.id].minutes);
+                    value = calculateStandardDeviation(minutesArray);
+                    break;
+                case 'foulsRegularity':
+                    const playerFoulsMatchesRadar = matches.filter(match => 
+                        match.playerStats[player.id] && match.playerStats[player.id].played
+                    );
+                    const foulsArrayRadar = playerFoulsMatchesRadar.map(match => match.playerStats[player.id].fouls || 0);
+                    value = calculateStandardDeviation(foulsArrayRadar);
+                    break;
             }
             return value;
         });
         
-        // Normaliser les valeurs (0-100 basé sur le max de toutes les joueuses)
+        // Normaliser les valeurs (0-100 basé sur TOUTE l'équipe, pas seulement les joueuses comparées)
         const normalizedValues = values.map((value, metricIndex) => {
-            const allValues = selectedPlayers.map(p => {
+            // Calculer les valeurs pour TOUTE l'équipe (pas seulement les joueuses sélectionnées)
+            const allTeamValues = players.map(p => {
                 switch (metrics[metricIndex].key) {
                     case 'matches':
                         return p.matches || 0;
@@ -882,16 +1026,49 @@ function updateComparisonRadar() {
                         return p.minutes || 0;
                     case 'foulsPerMatch':
                         return (p.matches > 0) ? (p.fouls || 0) / p.matches : 0;
+                    case 'pointsRegularity':
+                        const pPointsMatches = matches.filter(match => 
+                            match.playerStats[p.id] && match.playerStats[p.id].played
+                        );
+                        const pPointsArray = pPointsMatches.map(match => match.playerStats[p.id].points);
+                        return calculateStandardDeviation(pPointsArray);
+                    case 'minutesRegularity':
+                        const pMinutesMatches = matches.filter(match => 
+                            match.playerStats[p.id] && match.playerStats[p.id].played
+                        );
+                        const pMinutesArray = pMinutesMatches.map(match => match.playerStats[p.id].minutes);
+                        return calculateStandardDeviation(pMinutesArray);
+                    case 'foulsRegularity':
+                        const pFoulsMatches = matches.filter(match => 
+                            match.playerStats[p.id] && match.playerStats[p.id].played
+                        );
+                        const pFoulsArray = pFoulsMatches.map(match => match.playerStats[p.id].fouls || 0);
+                        return calculateStandardDeviation(pFoulsArray);
                     default:
                         return 0;
                 }
             });
-            const maxValue = Math.max(...allValues);
-            // Pour les fautes, on inverse la logique (moins de fautes = meilleur)
+            
+            const maxTeamValue = Math.max(...allTeamValues);
+            const minTeamValue = Math.min(...allTeamValues);
+            
+            // Pour les fautes et la régularité, on inverse la logique (moins = meilleur)
             if (metrics[metricIndex].key === 'foulsPerMatch') {
-                return maxValue > 0 ? Math.max(0, 100 - (value / maxValue) * 100) : 100;
+                // Pour les fautes : 0 fautes = 100%, 5 fautes = 0% (maximum théorique)
+                const maxFouls = 5; // Maximum théorique de fautes par match
+                return Math.max(0, ((maxFouls - value) / maxFouls) * 100);
             }
-            return maxValue > 0 ? (value / maxValue) * 100 : 0;
+            
+            if (metrics[metricIndex].key === 'pointsRegularity' || metrics[metricIndex].key === 'minutesRegularity' || metrics[metricIndex].key === 'foulsRegularity') {
+                // Pour la régularité : 0 écart-type = 100% (parfaitement régulier)
+                // Plus l'écart-type est élevé, plus le score est bas
+                if (maxTeamValue === 0) return 100; // Tout le monde est régulier
+                return Math.max(0, ((maxTeamValue - value) / maxTeamValue) * 100);
+            }
+            
+            // Pour les autres stats : normalisation classique sur l'équipe
+            if (maxTeamValue === 0) return 0;
+            return (value / maxTeamValue) * 100;
         });
         
         const colors = ['#c53030', '#3182ce', '#38a169'];
@@ -958,7 +1135,10 @@ function updateComparisonTable() {
         { label: 'Fautes totales', key: 'fouls', format: 'number', highlight: true, inverted: true },
         { label: 'Minutes/match', key: 'minutesPerMatch', format: 'decimal1', highlight: true },
         { label: 'Points/match', key: 'pointsPerMatch', format: 'decimal1', highlight: true },
+        { label: 'Régularité min.', key: 'minutesRegularity', format: 'decimal1', highlight: true, inverted: true },
+        { label: 'Régularité pts.', key: 'pointsRegularity', format: 'decimal1', highlight: true, inverted: true },
         { label: 'Fautes/match', key: 'foulsPerMatch', format: 'decimal1', highlight: true, inverted: true },
+        { label: 'Régularité fautes', key: 'foulsRegularity', format: 'decimal1', highlight: true, inverted: true },
         { label: 'Points/minute', key: 'pointsPerMinute', format: 'decimal2', highlight: true }
     ];
     
@@ -998,6 +1178,24 @@ function updateComparisonTable() {
                     return (player.matches > 0) ? (player.fouls || 0) / player.matches : 0;
                 case 'pointsPerMinute':
                     return (player.minutes > 0) ? (player.points || 0) / player.minutes : 0;
+                case 'pointsRegularity':
+                    const playerPointsMatches = matches.filter(match => 
+                        match.playerStats[player.id] && match.playerStats[player.id].played
+                    );
+                    const pointsArray = playerPointsMatches.map(match => match.playerStats[player.id].points);
+                    return calculateStandardDeviation(pointsArray);
+                case 'minutesRegularity':
+                    const playerMinutesMatches = matches.filter(match => 
+                        match.playerStats[player.id] && match.playerStats[player.id].played
+                    );
+                    const minutesArray = playerMinutesMatches.map(match => match.playerStats[player.id].minutes);
+                    return calculateStandardDeviation(minutesArray);
+                case 'foulsRegularity':
+                    const playerFoulsMatchesTable = matches.filter(match => 
+                        match.playerStats[player.id] && match.playerStats[player.id].played
+                    );
+                    const foulsArrayTable = playerFoulsMatchesTable.map(match => match.playerStats[player.id].fouls || 0);
+                    return calculateStandardDeviation(foulsArrayTable);
                 default:
                     return 0;
             }
@@ -1254,6 +1452,75 @@ function calculateStatLeaders() {
         leaders.foulsLast = [];
     }
     
+    // Podium de la régularité des points (logique inversée - moins d'écart-type = mieux)
+    const eligiblePlayersPointsRegularity = players.filter(p => (p.matches || 0) > 1); // Au moins 2 matchs pour calculer l'écart-type
+    if (eligiblePlayersPointsRegularity.length > 0) {
+        const pointsRegularityValues = eligiblePlayersPointsRegularity.map(p => {
+            const playerMatches = matches.filter(match => 
+                match.playerStats[p.id] && match.playerStats[p.id].played
+            );
+            const pointsArray = playerMatches.map(match => match.playerStats[p.id].points);
+            return calculateStandardDeviation(pointsArray);
+        });
+        const pointsRegularityIds = eligiblePlayersPointsRegularity.map(p => p.id);
+        const pointsRegularityPodium = calculatePodium(pointsRegularityValues, pointsRegularityIds, false); // false = tri ascendant (moins d'écart-type = mieux)
+        leaders.pointsRegularity = pointsRegularityPodium.gold;
+        leaders.pointsRegularitySilver = pointsRegularityPodium.silver;
+        leaders.pointsRegularityBronze = pointsRegularityPodium.bronze;
+        leaders.pointsRegularityLast = pointsRegularityPodium.last;
+    } else {
+        leaders.pointsRegularity = [];
+        leaders.pointsRegularitySilver = [];
+        leaders.pointsRegularityBronze = [];
+        leaders.pointsRegularityLast = [];
+    }
+    
+    // Podium de la régularité des minutes (logique inversée - moins d'écart-type = mieux)
+    const eligiblePlayersMinutesRegularity = players.filter(p => (p.matches || 0) > 1); // Au moins 2 matchs pour calculer l'écart-type
+    if (eligiblePlayersMinutesRegularity.length > 0) {
+        const minutesRegularityValues = eligiblePlayersMinutesRegularity.map(p => {
+            const playerMatches = matches.filter(match => 
+                match.playerStats[p.id] && match.playerStats[p.id].played
+            );
+            const minutesArray = playerMatches.map(match => match.playerStats[p.id].minutes);
+            return calculateStandardDeviation(minutesArray);
+        });
+        const minutesRegularityIds = eligiblePlayersMinutesRegularity.map(p => p.id);
+        const minutesRegularityPodium = calculatePodium(minutesRegularityValues, minutesRegularityIds, false); // false = tri ascendant (moins d'écart-type = mieux)
+        leaders.minutesRegularity = minutesRegularityPodium.gold;
+        leaders.minutesRegularitySilver = minutesRegularityPodium.silver;
+        leaders.minutesRegularityBronze = minutesRegularityPodium.bronze;
+        leaders.minutesRegularityLast = minutesRegularityPodium.last;
+    } else {
+        leaders.minutesRegularity = [];
+        leaders.minutesRegularitySilver = [];
+        leaders.minutesRegularityBronze = [];
+        leaders.minutesRegularityLast = [];
+    }
+    
+    // Podium de la régularité des fautes (logique inversée - moins d'écart-type = mieux)
+    const eligiblePlayersFoulsRegularity = players.filter(p => (p.matches || 0) > 1); // Au moins 2 matchs pour calculer l'écart-type
+    if (eligiblePlayersFoulsRegularity.length > 0) {
+        const foulsRegularityValues = eligiblePlayersFoulsRegularity.map(p => {
+            const playerMatches = matches.filter(match => 
+                match.playerStats[p.id] && match.playerStats[p.id].played
+            );
+            const foulsArray = playerMatches.map(match => match.playerStats[p.id].fouls || 0);
+            return calculateStandardDeviation(foulsArray);
+        });
+        const foulsRegularityIds = eligiblePlayersFoulsRegularity.map(p => p.id);
+        const foulsRegularityPodium = calculatePodium(foulsRegularityValues, foulsRegularityIds, false); // false = tri ascendant (moins d'écart-type = mieux)
+        leaders.foulsRegularity = foulsRegularityPodium.gold;
+        leaders.foulsRegularitySilver = foulsRegularityPodium.silver;
+        leaders.foulsRegularityBronze = foulsRegularityPodium.bronze;
+        leaders.foulsRegularityLast = foulsRegularityPodium.last;
+    } else {
+        leaders.foulsRegularity = [];
+        leaders.foulsRegularitySilver = [];
+        leaders.foulsRegularityBronze = [];
+        leaders.foulsRegularityLast = [];
+    }
+    
     return leaders;
 }
 
@@ -1297,6 +1564,19 @@ function renderPlayers() {
         const currentMinutesPerMatch = player.matches > 0 ? (player.minutes / player.matches) : 0;
         const currentPointsPerMinute = player.minutes > 0 ? (player.points / player.minutes) : 0;
         
+        // Calculer les écart-types (régularité)
+        const playerMatches = matches.filter(match => 
+            match.playerStats[player.id] && match.playerStats[player.id].played
+        );
+        
+        const pointsPerMatchArray = playerMatches.map(match => match.playerStats[player.id].points);
+        const minutesPerMatchArray = playerMatches.map(match => match.playerStats[player.id].minutes);
+        const foulsPerMatchArray = playerMatches.map(match => match.playerStats[player.id].fouls || 0);
+        
+        const pointsRegularity = calculateStandardDeviation(pointsPerMatchArray);
+        const minutesRegularity = calculateStandardDeviation(minutesPerMatchArray);
+        const foulsRegularity = calculateStandardDeviation(foulsPerMatchArray);
+        
         const { previousPointsPerMatch, previousMinutesPerMatch, previousPointsPerMinute } = calculatePlayerPreviousStats(player.id);
         
         return `
@@ -1332,6 +1612,14 @@ function renderPlayers() {
                         </span>
                         <div class="stat-label">Points/match</div>
                     </div>
+                    <div class="stat-item ${getPodiumClass(player.id, leaders, 'minutesRegularity')}">
+                        <span class="stat-value">${minutesRegularity.toFixed(1)}</span>
+                        <div class="stat-label">Régularité min.</div>
+                    </div>
+                    <div class="stat-item ${getPodiumClass(player.id, leaders, 'pointsRegularity')}">
+                        <span class="stat-value">${pointsRegularity.toFixed(1)}</span>
+                        <div class="stat-label">Régularité pts.</div>
+                    </div>
                     <div class="stat-item stat-wide ${getPodiumClass(player.id, leaders, 'pointsPerMinute')}">
                         <span class="stat-value">
                             ${currentPointsPerMinute.toFixed(2)}
@@ -1339,9 +1627,13 @@ function renderPlayers() {
                         </span>
                         <div class="stat-label">Points/minute</div>
                     </div>
-                    <div class="stat-item stat-wide ${getPodiumClass(player.id, leaders, 'fouls')}">
+                    <div class="stat-item ${getPodiumClass(player.id, leaders, 'fouls')}">
                         <span class="stat-value">${player.matches > 0 ? ((player.fouls || 0) / player.matches).toFixed(1) : '0.0'}</span>
                         <div class="stat-label">Fautes/match</div>
+                    </div>
+                    <div class="stat-item ${getPodiumClass(player.id, leaders, 'foulsRegularity')}">
+                        <span class="stat-value">${foulsRegularity.toFixed(1)}</span>
+                        <div class="stat-label">Régularité fautes</div>
                     </div>
                 </div>
             </div>
@@ -1352,7 +1644,13 @@ function renderPlayers() {
     if (currentTab === 'players') {
         setTimeout(() => {
             populatePlayerSelect();
-            updatePlayerChart();
+        }, 100);
+    }
+    
+    // Mettre à jour la liste des joueuses dans l'évolution si on est sur l'onglet evolution
+    if (currentTab === 'evolution') {
+        setTimeout(() => {
+            populateEvolutionPlayerSelect();
         }, 100);
     }
 }
@@ -1557,12 +1855,12 @@ function renderMatches() {
     const sortedMatches = [...matches].sort((a, b) => new Date(b.date) - new Date(a.date));
     
     matchesList.innerHTML = sortedMatches.map(match => `
-        <div class="match-card">
-            <div class="match-header">
+        <div class="match-card" data-match-id="${match.id}">
+            <div class="match-header" onclick="toggleMatchDetails(${match.id})">
                 <div class="match-opponent">
                     <i class="fas fa-vs"></i> ${match.opponent}
                 </div>
-                <div class="match-actions">
+                <div class="match-actions" onclick="event.stopPropagation()">
                     <button class="btn-icon btn-edit" onclick="editMatch(${match.id})" title="Modifier le match">
                         <i class="fas fa-edit"></i>
                     </button>
@@ -1570,6 +1868,9 @@ function renderMatches() {
                         <i class="fas fa-trash"></i>
                     </button>
                     <div class="match-result ${match.result}">${match.result.toUpperCase()}</div>
+                </div>
+                <div class="match-expand-icon">
+                    <i class="fas fa-chevron-down"></i>
                 </div>
             </div>
             <div class="match-details">
@@ -1590,8 +1891,118 @@ function renderMatches() {
                     <div class="match-detail-label">Lancers francs</div>
                 </div>
             </div>
+            <div class="match-player-stats" id="playerStats-${match.id}" style="display: none;">
+                <div class="player-stats-header">
+                    <h4><i class="fas fa-users"></i> Statistiques individuelles</h4>
+                </div>
+                <div class="player-stats-grid">
+                    ${generatePlayerStatsHTML(match)}
+                </div>
+            </div>
         </div>
     `).join('');
+}
+
+// Générer le HTML des statistiques des joueuses pour un match
+function generatePlayerStatsHTML(match) {
+    if (!match.playerStats) return '<p>Aucune statistique disponible</p>';
+    
+    const playerStatsEntries = Object.entries(match.playerStats);
+    const playersWithStats = playerStatsEntries.filter(([playerId, stats]) => stats.played);
+    const playersWithoutStats = playerStatsEntries.filter(([playerId, stats]) => !stats.played);
+    
+    // Calculer les meilleures performances parmi les joueuses qui ont joué
+    let maxPoints = 0;
+    let maxMinutes = 0;
+    
+    playersWithStats.forEach(([playerId, stats]) => {
+        const points = parseInt(stats.points) || 0;
+        const minutes = parseInt(stats.minutes) || 0;
+        if (points > maxPoints) maxPoints = points;
+        if (minutes > maxMinutes) maxMinutes = minutes;
+    });
+    
+    let html = '';
+    
+    // Joueuses qui ont joué
+    if (playersWithStats.length > 0) {
+        html += '<div class="stats-section"><h5>Joueuses ayant participé</h5><div class="stats-grid">';
+        playersWithStats.forEach(([playerId, stats]) => {
+            const player = players.find(p => p.id === parseInt(playerId));
+            if (player) {
+                const points = parseInt(stats.points) || 0;
+                const minutes = parseInt(stats.minutes) || 0;
+                const fouls = parseInt(stats.fouls) || 0;
+                
+                // Déterminer les classes CSS pour chaque statistique
+                const pointsClass = (points > 0 && points === maxPoints) ? 'stat-item-simple best-performance' : 'stat-item-simple';
+                const minutesClass = (minutes > 0 && minutes === maxMinutes) ? 'stat-item-simple best-performance' : 'stat-item-simple';
+                const foulsClass = (fouls >= 5) ? 'stat-item-simple max-fouls' : 'stat-item-simple';
+                
+                html += `
+                    <div class="player-stat-card">
+                        <div class="player-stat-header">
+                            <span class="player-number">#${player.numero}</span>
+                            <span class="player-name">${player.prenom}</span>
+                        </div>
+                        <div class="match-player-stat-details">
+                            <div class="${pointsClass}">
+                                <span class="stat-label-simple">Points</span>
+                                <span class="stat-value-simple">${points}</span>
+                            </div>
+                            <div class="${minutesClass}">
+                                <span class="stat-label-simple">Minutes</span>
+                                <span class="stat-value-simple">${minutes}</span>
+                            </div>
+                            <div class="${foulsClass}">
+                                <span class="stat-label-simple">Fautes</span>
+                                <span class="stat-value-simple">${fouls}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        html += '</div></div>';
+    }
+    
+    // Joueuses qui n'ont pas joué
+    if (playersWithoutStats.length > 0) {
+        html += '<div class="stats-section"><h5>Joueuses n\'ayant pas participé</h5><div class="non-players-grid">';
+        playersWithoutStats.forEach(([playerId, stats]) => {
+            const player = players.find(p => p.id === parseInt(playerId));
+            if (player) {
+                html += `
+                    <div class="non-player-card">
+                        <span class="player-number">#${player.numero}</span>
+                        <span class="player-name">${player.prenom}</span>
+                    </div>
+                `;
+            }
+        });
+        html += '</div></div>';
+    }
+    
+    return html;
+}
+
+// Toggle l'affichage des détails d'un match
+function toggleMatchDetails(matchId) {
+    const playerStatsDiv = document.getElementById(`playerStats-${matchId}`);
+    const matchCard = document.querySelector(`[data-match-id="${matchId}"]`);
+    const expandIcon = matchCard.querySelector('.match-expand-icon i');
+    
+    if (playerStatsDiv.style.display === 'none') {
+        playerStatsDiv.style.display = 'block';
+        expandIcon.classList.remove('fa-chevron-down');
+        expandIcon.classList.add('fa-chevron-up');
+        matchCard.classList.add('expanded');
+    } else {
+        playerStatsDiv.style.display = 'none';
+        expandIcon.classList.remove('fa-chevron-up');
+        expandIcon.classList.add('fa-chevron-down');
+        matchCard.classList.remove('expanded');
+    }
 }
 
 // Ouverture de la modal d'ajout de match
@@ -1971,10 +2382,12 @@ function editMatch(matchId) {
         if (stats) {
             const pointsField = document.querySelector(`input[name="points_${player.id}"]`);
             const minutesField = document.querySelector(`input[name="minutes_${player.id}"]`);
+            const foulsField = document.querySelector(`input[name="fouls_${player.id}"]`);
             const playedField = document.querySelector(`select[name="played_${player.id}"]`);
             
             if (pointsField) pointsField.value = stats.points || 0;
             if (minutesField) minutesField.value = stats.minutes || 0;
+            if (foulsField) foulsField.value = stats.fouls || 0;
             if (playedField) playedField.value = stats.played ? 1 : 0;
         }
     });
@@ -2057,7 +2470,7 @@ function recalculateAllStats() {
 
 // Variables globales pour les graphiques
 let performanceChart = null;
-let playerPerformanceChart = null;
+let evolutionChart = null;
 
 // Configuration des couleurs pour chaque métrique
 const chartColors = {
@@ -2067,12 +2480,6 @@ const chartColors = {
     'ranking': '#f59e0b',
     'attack-ranking': '#8b5cf6',
     'defense-ranking': '#06b6d4'
-};
-
-// Couleurs pour les graphiques individuels
-const playerChartColors = {
-    'points': '#c53030',
-    'minutes': '#3b82f6'
 };
 
 // Initialisation des graphiques
@@ -2374,24 +2781,411 @@ function updateChart() {
     });
 }
 
-// Initialisation des graphiques de joueuses
-function initializePlayerCharts() {
-    populatePlayerSelect();
+// Initialisation de l'évolution individuelle
+function initializeEvolution() {
+    populateEvolutionPlayerSelect();
     
-    const playerSelect = document.getElementById('playerSelect');
+    const playerSelect = document.getElementById('evolutionPlayerSelect');
     if (playerSelect) {
-        playerSelect.addEventListener('change', updatePlayerChart);
+        playerSelect.addEventListener('change', onEvolutionPlayerChange);
     }
     
-    const showHistograms = document.getElementById('showHistograms');
-    if (showHistograms) {
-        showHistograms.addEventListener('change', updatePlayerChart);
-    }
-    
-    updatePlayerChart();
+    // Écouteurs pour les checkboxes de statistiques
+    const checkboxes = document.querySelectorAll('.stats-checkboxes input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateEvolutionChart);
+    });
 }
 
-// Remplir la liste déroulante avec les joueuses
+// Remplir la liste déroulante avec les joueuses pour l'évolution
+function populateEvolutionPlayerSelect() {
+    const playerSelect = document.getElementById('evolutionPlayerSelect');
+    if (!playerSelect) {
+        console.log('ERROR: evolutionPlayerSelect not found');
+        return;
+    }
+    
+    console.log('Populating evolution player select with', players.length, 'players');
+    
+    // Garder la première option "-- Choisir une joueuse --"
+    playerSelect.innerHTML = '<option value="">-- Choisir une joueuse --</option>';
+    
+    // Ajouter toutes les joueuses
+    players.forEach(player => {
+        const option = document.createElement('option');
+        option.value = player.id;
+        option.textContent = `#${player.numero} ${player.prenom}`;
+        playerSelect.appendChild(option);
+    });
+}
+
+// Quand une joueuse est sélectionnée pour l'évolution
+function onEvolutionPlayerChange() {
+    const playerSelect = document.getElementById('evolutionPlayerSelect');
+    const selectedPlayerId = playerSelect ? playerSelect.value : '';
+    
+    console.log('Evolution player changed:', selectedPlayerId);
+    
+    const statsSelector = document.getElementById('statsSelector');
+    const chartContainer = document.getElementById('evolutionChartContainer');
+    const matchesContainer = document.getElementById('evolutionMatches');
+    
+    if (selectedPlayerId) {
+        statsSelector.style.display = 'block';
+        updateEvolutionChart();
+        updateEvolutionMatchesTable();
+    } else {
+        statsSelector.style.display = 'none';
+        chartContainer.style.display = 'none';
+        matchesContainer.style.display = 'none';
+    }
+}
+
+// Mettre à jour le graphique d'évolution
+function updateEvolutionChart() {
+    const playerSelect = document.getElementById('evolutionPlayerSelect');
+    const selectedPlayerId = playerSelect ? playerSelect.value : '';
+    
+    if (!selectedPlayerId) return;
+    
+    const checkboxes = document.querySelectorAll('.stats-checkboxes input[type="checkbox"]:checked');
+    const selectedStats = Array.from(checkboxes).map(cb => cb.value);
+    
+    const chartContainer = document.getElementById('evolutionChartContainer');
+    
+    if (selectedStats.length === 0) {
+        chartContainer.style.display = 'none';
+        return;
+    }
+    
+    chartContainer.style.display = 'block';
+    
+    const ctx = document.getElementById('evolutionChart');
+    if (!ctx) return;
+    
+    if (evolutionChart) {
+        evolutionChart.destroy();
+    }
+    
+    const { labels, datasets, maxPoints, maxPointsPerMinute } = calculateEvolutionData(parseInt(selectedPlayerId), selectedStats);
+    const selectedPlayer = players.find(p => p.id === parseInt(selectedPlayerId));
+    
+    // Vérifier si la joueuse a participé à au moins un match
+    if (labels.length === 0) {
+        chartContainer.innerHTML = '<div class="no-evolution-data">Aucune donnée d\'évolution disponible.<br>Cette joueuse n\'a participé à aucun match.</div>';
+        return;
+    }
+    
+    // Créer la configuration des échelles selon les statistiques sélectionnées
+    const scales = {
+        x: {
+            title: {
+                display: true,
+                text: 'Matchs'
+            }
+        }
+    };
+    
+    // Déterminer la répartition des échelles (équilibrée gauche/droite)
+    const leftAxes = [];
+    const rightAxes = [];
+    
+    // Répartir les axes de manière équilibrée
+    selectedStats.forEach((stat, index) => {
+        if (index % 2 === 0) {
+            leftAxes.push(stat);
+        } else {
+            rightAxes.push(stat);
+        }
+    });
+    
+    // Ajouter seulement les échelles nécessaires
+    if (selectedStats.includes('points')) {
+        const position = leftAxes.includes('points') ? 'left' : 'right';
+        const isMainAxis = leftAxes.includes('points');
+        scales.yPoints = {
+            type: 'linear',
+            display: true,
+            position: position,
+            title: {
+                display: true,
+                text: 'Points',
+                color: '#3b82f6'
+            },
+            min: 0,
+            max: maxPoints + 2,
+            ticks: {
+                color: '#3b82f6',
+                stepSize: Math.max(1, Math.ceil(maxPoints / 10)),
+                callback: function(value) {
+                    return value + ' pt' + (value > 1 ? 's' : '');
+                }
+            },
+            grid: {
+                drawOnChartArea: isMainAxis,
+                color: 'rgba(59, 130, 246, 0.1)'
+            }
+        };
+    }
+    
+    if (selectedStats.includes('minutes')) {
+        const position = leftAxes.includes('minutes') ? 'left' : 'right';
+        const isMainAxis = leftAxes.includes('minutes') && !leftAxes.includes('points');
+        scales.yMinutes = {
+            type: 'linear',
+            display: true,
+            position: position,
+            title: {
+                display: true,
+                text: 'Minutes',
+                color: '#ef4444'
+            },
+            min: 0,
+            max: 40,
+            ticks: {
+                color: '#ef4444',
+                stepSize: 5,
+                callback: function(value) {
+                    return value + ' min';
+                }
+            },
+            grid: {
+                drawOnChartArea: isMainAxis,
+                color: 'rgba(239, 68, 68, 0.1)'
+            }
+        };
+    }
+    
+    if (selectedStats.includes('fouls')) {
+        const position = leftAxes.includes('fouls') ? 'left' : 'right';
+        const isMainAxis = leftAxes.includes('fouls') && !leftAxes.includes('points') && !leftAxes.includes('minutes');
+        scales.yFouls = {
+            type: 'linear',
+            display: true,
+            position: position,
+            title: {
+                display: true,
+                text: 'Fautes',
+                color: '#f59e0b'
+            },
+            min: 0,
+            max: 5,
+            ticks: {
+                color: '#f59e0b',
+                stepSize: 1,
+                callback: function(value) {
+                    return value + ' faute' + (value > 1 ? 's' : '');
+                }
+            },
+            grid: {
+                drawOnChartArea: isMainAxis,
+                color: 'rgba(245, 158, 11, 0.1)'
+            }
+        };
+    }
+    
+    if (selectedStats.includes('pointsPerMinute')) {
+        const position = leftAxes.includes('pointsPerMinute') ? 'left' : 'right';
+        const isMainAxis = leftAxes.includes('pointsPerMinute') && 
+                          !leftAxes.includes('points') && 
+                          !leftAxes.includes('minutes') && 
+                          !leftAxes.includes('fouls');
+        scales.yPointsPerMinute = {
+            type: 'linear',
+            display: true,
+            position: position,
+            title: {
+                display: true,
+                text: 'Points/minute',
+                color: '#22c55e'
+            },
+            min: 0,
+            max: Math.max(0.5, maxPointsPerMinute + 0.1),
+            ticks: {
+                color: '#22c55e',
+                stepSize: 0.1,
+                callback: function(value) {
+                    return value.toFixed(1);
+                }
+            },
+            grid: {
+                drawOnChartArea: isMainAxis,
+                color: 'rgba(34, 197, 94, 0.1)'
+            }
+        };
+    }
+    
+    evolutionChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Évolution de ${selectedPlayer?.prenom} (#${selectedPlayer?.numero})`,
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                }
+            },
+            scales: scales,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+}
+
+// Calculer les données pour le graphique d'évolution
+function calculateEvolutionData(playerId, selectedStats) {
+    const sortedMatches = [...matches].sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // Filtrer seulement les matchs où la joueuse a participé
+    const playedMatches = sortedMatches.filter(match => {
+        const playerStats = match.playerStats[playerId.toString()];
+        return playerStats && playerStats.played;
+    });
+    
+    // Créer les labels seulement pour les matchs joués
+    const labels = playedMatches.map(match => {
+        const date = new Date(match.date);
+        return `${date.getDate()}/${date.getMonth() + 1} vs ${match.opponent}`;
+    });
+    
+    const datasets = [];
+    const colors = {
+        points: '#3b82f6',
+        minutes: '#ef4444',
+        fouls: '#f59e0b',
+        pointsPerMinute: '#22c55e'
+    };
+    
+    let maxPoints = 0;
+    let maxPointsPerMinute = 0;
+    
+    selectedStats.forEach(statType => {
+        const data = [];
+        
+        playedMatches.forEach(match => {
+            const playerStats = match.playerStats[playerId.toString()];
+            let value = 0;
+            switch (statType) {
+                case 'points':
+                    value = playerStats.points || 0;
+                    maxPoints = Math.max(maxPoints, value);
+                    data.push(value);
+                    break;
+                case 'minutes':
+                    value = playerStats.minutes || 0;
+                    data.push(value);
+                    break;
+                case 'fouls':
+                    value = playerStats.fouls || 0;
+                    data.push(value);
+                    break;
+                case 'pointsPerMinute':
+                    const minutes = playerStats.minutes || 0;
+                    const points = playerStats.points || 0;
+                    value = minutes > 0 ? parseFloat((points / minutes).toFixed(3)) : 0;
+                    maxPointsPerMinute = Math.max(maxPointsPerMinute, value);
+                    data.push(value);
+                    break;
+            }
+        });
+        
+        const statLabels = {
+            points: 'Points/match',
+            minutes: 'Minutes/match',
+            fouls: 'Fautes/match',
+            pointsPerMinute: 'Points/minute'
+        };
+        
+        const yAxisMapping = {
+            points: 'yPoints',
+            minutes: 'yMinutes',
+            fouls: 'yFouls',
+            pointsPerMinute: 'yPointsPerMinute'
+        };
+        
+        datasets.push({
+            label: statLabels[statType],
+            data: data,
+            borderColor: colors[statType],
+            backgroundColor: colors[statType] + '20',
+            borderWidth: 2,
+            fill: false,
+            tension: 0.1,
+            pointRadius: 4,
+            pointHoverRadius: 8,
+            yAxisID: yAxisMapping[statType]
+        });
+    });
+    
+    return { labels, datasets, maxPoints, maxPointsPerMinute };
+}
+
+// Mettre à jour la table des matchs pour l'évolution
+function updateEvolutionMatchesTable() {
+    const playerSelect = document.getElementById('evolutionPlayerSelect');
+    const selectedPlayerId = playerSelect ? playerSelect.value : '';
+    
+    console.log('Updating matches table for player:', selectedPlayerId);
+    console.log('Available matches:', matches.length);
+    
+    if (!selectedPlayerId) return;
+    
+    const matchesContainer = document.getElementById('evolutionMatches');
+    const tbody = document.getElementById('evolutionMatchesBody');
+    
+    if (!tbody) return;
+    
+    matchesContainer.style.display = 'block';
+    tbody.innerHTML = '';
+    
+    const sortedMatches = [...matches].sort((a, b) => new Date(b.date) - new Date(a.date)); // Plus récent en premier
+    
+    sortedMatches.forEach(match => {
+        const playerStats = match.playerStats[selectedPlayerId];
+        
+        console.log(`Match ${match.opponent}:`, playerStats);
+        
+        if (playerStats && playerStats.played) {
+            const row = document.createElement('tr');
+            
+            const date = new Date(match.date);
+            const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+            
+            const points = playerStats.points || 0;
+            const minutes = playerStats.minutes || 0;
+            const fouls = playerStats.fouls || 0;
+            const pointsPerMinute = minutes > 0 ? (points / minutes).toFixed(3) : '0.000';
+            
+            row.innerHTML = `
+                <td>${formattedDate}</td>
+                <td>${match.opponent}</td>
+                <td>${points}</td>
+                <td>${minutes}</td>
+                <td>${fouls}</td>
+                <td>${pointsPerMinute}</td>
+            `;
+            
+            tbody.appendChild(row);
+        }
+    });
+}
+
+// Ancienne fonction populatePlayerSelect (à garder pour la compatibilité)
 function populatePlayerSelect() {
     const playerSelect = document.getElementById('playerSelect');
     if (!playerSelect) return;
@@ -2408,204 +3202,6 @@ function populatePlayerSelect() {
     });
 }
 
-// Calcul des données pour le graphique d'une joueuse
-function calculatePlayerChartData(playerId) {
-    if (!playerId) return { labels: [], datasets: [] };
-    
-    const sortedMatches = [...matches].sort((a, b) => new Date(a.date) - new Date(b.date));
-    
-    const labels = sortedMatches.map(match => {
-        const date = new Date(match.date);
-        return `${date.getDate()}/${date.getMonth() + 1}`;
-    });
-    
-    const pointsData = [];
-    const minutesData = [];
-    const pointsPerMatchData = [];
-    const minutesPerMatchData = [];
-    
-    let cumulativePoints = 0;
-    let cumulativeMinutes = 0;
-    let matchesPlayed = 0;
-    
-    sortedMatches.forEach(match => {
-        const playerStats = match.playerStats[playerId];
-        
-        if (playerStats && playerStats.played) {
-            const points = playerStats.points || 0;
-            const minutes = playerStats.minutes || 0;
-            
-            cumulativePoints += points;
-            cumulativeMinutes += minutes;
-            matchesPlayed++;
-            
-            pointsData.push(points);
-            minutesData.push(minutes);
-            pointsPerMatchData.push(cumulativePoints / matchesPlayed);
-            minutesPerMatchData.push(cumulativeMinutes / matchesPlayed);
-        } else {
-            // Si n'a pas joué
-            pointsData.push(0);
-            minutesData.push(0);
-            pointsPerMatchData.push(matchesPlayed > 0 ? cumulativePoints / matchesPlayed : 0);
-            minutesPerMatchData.push(matchesPlayed > 0 ? cumulativeMinutes / matchesPlayed : 0);
-        }
-    });
-    
-    const showHistograms = document.getElementById('showHistograms');
-    const shouldShowHistograms = showHistograms ? showHistograms.checked : true;
-    
-    const datasets = [];
-    
-    // Ajouter les histogrammes seulement si la checkbox est cochée
-    if (shouldShowHistograms) {
-        // Histogramme - Points par match
-        datasets.push({
-            label: 'Points dans le match',
-            data: pointsData,
-            backgroundColor: playerChartColors.points + '50',
-            borderColor: playerChartColors.points,
-            borderWidth: 2,
-            type: 'bar',
-            yAxisID: 'y'
-        });
-        
-        // Histogramme - Minutes par match
-        datasets.push({
-            label: 'Minutes dans le match',
-            data: minutesData,
-            backgroundColor: playerChartColors.minutes + '50',
-            borderColor: playerChartColors.minutes,
-            borderWidth: 2,
-            type: 'bar',
-            yAxisID: 'y1'
-        });
-    }
-    
-    // Toujours ajouter les courbes de moyennes
-    // Courbe - Moyenne points par match
-    datasets.push({
-        label: 'Moyenne points/match',
-        data: pointsPerMatchData,
-        borderColor: playerChartColors.points,
-        backgroundColor: 'transparent',
-        tension: 0.4,
-        type: 'line',
-        borderWidth: 3,
-        pointRadius: 5,
-        pointBackgroundColor: playerChartColors.points,
-        yAxisID: 'y'
-    });
-    
-    // Courbe - Moyenne minutes par match
-    datasets.push({
-        label: 'Moyenne minutes/match',
-        data: minutesPerMatchData,
-        borderColor: playerChartColors.minutes,
-        backgroundColor: 'transparent',
-        tension: 0.4,
-        type: 'line',
-        borderWidth: 3,
-        pointRadius: 5,
-        pointBackgroundColor: playerChartColors.minutes,
-        yAxisID: 'y1'
-    });
-    
-    return { labels, datasets };
-}
-
-// Mise à jour du graphique de joueuse
-function updatePlayerChart() {
-    const ctx = document.getElementById('playerPerformanceChart');
-    if (!ctx) return;
-    
-    const playerSelect = document.getElementById('playerSelect');
-    const selectedPlayerId = playerSelect ? playerSelect.value : '';
-    
-    if (playerPerformanceChart) {
-        playerPerformanceChart.destroy();
-    }
-    
-    if (!selectedPlayerId) {
-        // Afficher un message si aucune joueuse sélectionnée
-        ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
-        return;
-    }
-    
-    const { labels, datasets } = calculatePlayerChartData(parseInt(selectedPlayerId));
-    const selectedPlayer = players.find(p => p.id === parseInt(selectedPlayerId));
-    
-    playerPerformanceChart = new Chart(ctx, {
-        type: 'bar', // Type principal, mais on mixe avec des lignes
-        data: { labels, datasets },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: `Performance de ${selectedPlayer?.prenom} (#${selectedPlayer?.numero})`,
-                    font: {
-                        size: 16,
-                        weight: 'bold'
-                    }
-                },
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Matchs'
-                    }
-                },
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Points',
-                        color: playerChartColors.points
-                    },
-                    grid: {
-                        color: 'rgba(197, 48, 48, 0.1)'
-                    },
-                    ticks: {
-                        color: playerChartColors.points
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Minutes',
-                        color: playerChartColors.minutes
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    },
-                    ticks: {
-                        color: playerChartColors.minutes
-                    }
-                }
-            },
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            }
-        }
-    });
-}
-
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Initialisation de l\'application...');
@@ -2613,9 +3209,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Charger les données depuis le localStorage
     loadDataFromStorage();
     console.log('Données chargées:', { players: players.length, matches: matches.length });
+    console.log('Exemple de match:', matches[0]);
     
     // Initialiser les composants
     populatePlayerSelect();
+    populateEvolutionPlayerSelect();
     populateComparisonSelects();
     renderMatches();
     renderPlayers();

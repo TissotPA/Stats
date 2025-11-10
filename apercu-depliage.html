@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aperçu du système de dépliage</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .demo-container { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .state { padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .collapsed { background: #e3f2fd; border-left: 4px solid #2196f3; }
+        .expanded { background: #e8f5e8; border-left: 4px solid #4caf50; }
+        .mockup { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .match-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .stats-preview { margin-top: 15px; padding: 15px; background: #fff; border-radius: 8px; }
+        .player-preview { display: flex; gap: 10px; margin: 8px 0; }
+        .number { background: #c53030; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; }
+        .stats { display: flex; gap: 15px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🏀 Aperçu du système de dépliage des matchs</h1>
+        
+        <h2>États visuels</h2>
+        
+        <div class="state collapsed">
+            <h3>🔽 État replié (par défaut)</h3>
+            <div class="mockup">
+                <div class="match-header">
+                    <div><strong>🆚 Le Cergne</strong></div>
+                    <div>🔽 ⚙️ 🗑️ VICTOIRE</div>
+                </div>
+                <div style="color: #666; margin-top: 10px;">
+                    21/09/2025 • Extérieur • 49-45 • LF: 18/38
+                </div>
+            </div>
+            <p>➡️ <strong>Cliquer</strong> pour déplier et voir les statistiques individuelles</p>
+        </div>
+        
+        <div class="state expanded">
+            <h3>🔼 État déplié</h3>
+            <div class="mockup">
+                <div class="match-header">
+                    <div><strong>🆚 Le Cergne</strong></div>
+                    <div>🔼 ⚙️ 🗑️ VICTOIRE</div>
+                </div>
+                <div style="color: #666; margin: 10px 0;">
+                    21/09/2025 • Extérieur • 49-45 • LF: 18/38
+                </div>
+                <div class="stats-preview">
+                    <h4>👥 Statistiques individuelles</h4>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <h5 style="margin-bottom: 10px;">Joueuses ayant participé</h5>
+                        <div class="player-preview">
+                            <span class="number">#5</span>
+                            <span><strong>Ludivine</strong></span>
+                            <div class="stats">
+                                <span>7 pts</span> • <span>36 min</span> • <span>3 fautes</span> • <span>0.194 pts/min</span>
+                            </div>
+                        </div>
+                        <div class="player-preview">
+                            <span class="number">#6</span>
+                            <span><strong>Marina</strong></span>
+                            <div class="stats">
+                                <span>12 pts</span> • <span>32 min</span> • <span>2 fautes</span> • <span>0.375 pts/min</span>
+                            </div>
+                        </div>
+                        <div class="player-preview">
+                            <span class="number">#7</span>
+                            <span><strong>Emma</strong></span>
+                            <div class="stats">
+                                <span>0 pts</span> • <span>27 min</span> • <span>4 fautes</span> • <span>0.000 pts/min</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5 style="margin-bottom: 10px; opacity: 0.7;">Joueuses n'ayant pas participé</h5>
+                        <div style="display: flex; gap: 10px; opacity: 0.6;">
+                            <span style="background: #999; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em;">#4</span>
+                            <span>Noémie</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p>➡️ <strong>Re-cliquer</strong> pour replier</p>
+        </div>
+        
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <h3>💡 Points clés</h3>
+            <ul>
+                <li><strong>Clic intelligent</strong> : Seul l'en-tête déplie, pas les boutons d'action</li>
+                <li><strong>Animation fluide</strong> : L'icône pivote et l'affichage se fait en douceur</li>
+                <li><strong>Données complètes</strong> : Points, minutes, fautes et ratio points/minute</li>
+                <li><strong>Distinction claire</strong> : Joueuses participantes vs non-participantes</li>
+                <li><strong>Design cohérent</strong> : Couleurs et styles alignés avec l'application</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

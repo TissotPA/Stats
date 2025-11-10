@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemple d'échelles différenciées</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .example-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .scale-example {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .scale-points { background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; }
+        .scale-minutes { background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; }
+        .scale-fouls { background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; }
+        .scale-ppm { background: rgba(34, 197, 94, 0.1); border-left: 4px solid #22c55e; }
+        
+        .scale-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .scale-name {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .scale-range {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .scale-position {
+            background: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            color: #555;
+        }
+        
+        .combination-examples {
+            margin-top: 20px;
+        }
+        .combo {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+        }
+        .combo h4 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .axes {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .axis {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        .axis-left { background: #e3f2fd; color: #1976d2; }
+        .axis-right { background: #fce4ec; color: #c2185b; }
+    </style>
+</head>
+<body>
+    <div class="example-container">
+        <h1>🎯 Échelles différenciées pour le graphique d'évolution</h1>
+        
+        <h2>Échelles individuelles</h2>
+        
+        <div class="scale-example scale-points">
+            <div class="scale-info">
+                <div class="scale-name">📊 Points par match</div>
+                <div class="scale-range">Échelle : 0 → max points + 2</div>
+            </div>
+            <div class="scale-position">Gauche (priorité)</div>
+        </div>
+        
+        <div class="scale-example scale-minutes">
+            <div class="scale-info">
+                <div class="scale-name">⏱️ Minutes par match</div>
+                <div class="scale-range">Échelle : 0 → 40 minutes</div>
+            </div>
+            <div class="scale-position">Gauche ou Droite</div>
+        </div>
+        
+        <div class="scale-example scale-fouls">
+            <div class="scale-info">
+                <div class="scale-name">⚠️ Fautes par match</div>
+                <div class="scale-range">Échelle : 0 → 5 fautes</div>
+            </div>
+            <div class="scale-position">Droite</div>
+        </div>
+        
+        <div class="scale-example scale-ppm">
+            <div class="scale-info">
+                <div class="scale-name">🎯 Points par minute</div>
+                <div class="scale-range">Échelle : 0 → max pts/min + 0.1</div>
+            </div>
+            <div class="scale-position">Droite</div>
+        </div>
+        
+        <div class="combination-examples">
+            <h2>Exemples de combinaisons</h2>
+            
+            <div class="combo">
+                <h4>Points + Minutes</h4>
+                <div class="axes">
+                    <div class="axis axis-left">📊 Points (0-20 pts) - Gauche</div>
+                    <div class="axis axis-right">⏱️ Minutes (0-40 min) - Droite</div>
+                </div>
+            </div>
+            
+            <div class="combo">
+                <h4>Points + Fautes</h4>
+                <div class="axes">
+                    <div class="axis axis-left">📊 Points (0-20 pts) - Gauche</div>
+                    <div class="axis axis-right">⚠️ Fautes (0-5) - Droite</div>
+                </div>
+            </div>
+            
+            <div class="combo">
+                <h4>Minutes seules</h4>
+                <div class="axes">
+                    <div class="axis axis-left">⏱️ Minutes (0-40 min) - Gauche</div>
+                </div>
+            </div>
+            
+            <div class="combo">
+                <h4>Toutes les statistiques</h4>
+                <div class="axes">
+                    <div class="axis axis-left">📊 Points (priorité) - Gauche</div>
+                    <div class="axis axis-right">⏱️ Minutes, ⚠️ Fautes, 🎯 Pts/min - Droite</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 15px; background: #d4edda; border-radius: 8px; border: 1px solid #c3e6cb;">
+            <h3 style="color: #155724; margin-top: 0;">✅ Avantages</h3>
+            <ul style="color: #155724;">
+                <li><strong>Lisibilité améliorée</strong> : Chaque métrique a son échelle optimale</li>
+                <li><strong>Comparaison facilitée</strong> : Les valeurs sont à l'échelle appropriée</li>
+                <li><strong>Couleurs cohérentes</strong> : Axes et courbes de même couleur</li>
+                <li><strong>Unités affichées</strong> : pts, min, fautes clairement indiqués</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -44,6 +44,9 @@
             <button class="nav-btn" data-tab="comparison">
                 <i class="fas fa-balance-scale"></i> Comparaison
             </button>
+            <button class="nav-btn" data-tab="evolution">
+                <i class="fas fa-chart-area"></i> Évolution
+            </button>
             <button class="nav-btn" data-tab="team">
                 <i class="fas fa-chart-line"></i> Équipe
             </button>
@@ -119,6 +122,14 @@
                         <canvas id="dashboardChart"></canvas>
                     </div>
                 </div>
+
+                <!-- Leaders par statistiques -->
+                <div class="dashboard-section">
+                    <h3><i class="fas fa-crown"></i> Leaders par statistiques</h3>
+                    <div class="leaders-grid" id="leadersGrid">
+                        <!-- Généré par JavaScript -->
+                    </div>
+                </div>
             </section>
 
             <!-- Section Joueuses -->
@@ -134,30 +145,7 @@
                     <!-- Les cartes des joueuses seront générées par JavaScript -->
                 </div>
                 
-                <!-- Section Graphiques Joueuses -->
-                <div class="player-charts-section">
-                    <div class="section-header">
-                        <h2>Évolution individuelle</h2>
-                    </div>
-                    <div class="player-chart-controls">
-                        <div class="player-selector">
-                            <label for="playerSelect">Sélectionner une joueuse :</label>
-                            <select id="playerSelect">
-                                <option value="">-- Choisir une joueuse --</option>
-                            </select>
-                        </div>
-                        <div class="chart-option-player">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="showHistograms" checked>
-                                <span class="checkmark-simple"></span>
-                                Afficher les histogrammes
-                            </label>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="playerPerformanceChart"></canvas>
-                    </div>
-                </div>
+
             </section>
 
             <!-- Section Comparaison -->
@@ -218,6 +206,69 @@
                     <div class="comparison-table-container">
                         <table id="comparisonTable" class="comparison-table">
                             <!-- Généré par JavaScript -->
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Évolution individuelle -->
+            <section id="evolution" class="tab-content">
+                <div class="section-header">
+                    <h2>Évolution individuelle</h2>
+                </div>
+                
+                <div class="evolution-controls">
+                    <div class="player-selector">
+                        <label for="evolutionPlayerSelect">Sélectionner une joueuse :</label>
+                        <select id="evolutionPlayerSelect">
+                            <option value="">-- Choisir une joueuse --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="stats-selector" id="statsSelector" style="display: none;">
+                        <label>Statistiques à afficher :</label>
+                        <div class="stats-checkboxes">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="stat-points" value="points">
+                                <label for="stat-points">Points/match</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="stat-minutes" value="minutes">
+                                <label for="stat-minutes">Minutes/match</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="stat-fouls" value="fouls">
+                                <label for="stat-fouls">Fautes/match</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="stat-pointsPerMinute" value="pointsPerMinute">
+                                <label for="stat-pointsPerMinute">Points/minute</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="evolution-chart-container" id="evolutionChartContainer" style="display: none;">
+                    <canvas id="evolutionChart"></canvas>
+                </div>
+
+                <div class="evolution-matches" id="evolutionMatches" style="display: none;">
+                    <h3>Historique des matchs</h3>
+                    <div class="matches-table-container">
+                        <table class="matches-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Adversaire</th>
+                                    <th>Points</th>
+                                    <th>Minutes</th>
+                                    <th>Fautes</th>
+                                    <th>Points/min</th>
+                                </tr>
+                            </thead>
+                            <tbody id="evolutionMatchesBody">
+                                <!-- Les données des matchs seront ajoutées ici -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
