@@ -77,17 +77,18 @@ function clearAllData() {
 // Initialisation des joueuses (avec vos vraies joueuses)
 function initializePlayers() {
     players = [
-        { id: 1, prenom: 'Noémie', numero: 4, matches: 0, points: 0, minutes: 0 },
-        { id: 2, prenom: 'Ludivine', numero: 5, matches: 0, points: 0, minutes: 0 },
-        { id: 3, prenom: 'Marina', numero: 6, matches: 0, points: 0, minutes: 0 },
-        { id: 4, prenom: 'Emma', numero: 7, matches: 0, points: 0, minutes: 0 },
-        { id: 5, prenom: 'Lou-Ann', numero: 8, matches: 0, points: 0, minutes: 0 },
-        { id: 6, prenom: 'Julie C.', numero: 9, matches: 0, points: 0, minutes: 0 },
-        { id: 7, prenom: 'Sonia', numero: 11, matches: 0, points: 0, minutes: 0 },
-        { id: 8, prenom: 'Julie L.', numero: 12, matches: 0, points: 0, minutes: 0 },
-        { id: 9, prenom: 'Charlène', numero: 13, matches: 0, points: 0, minutes: 0 },
-        { id: 10, prenom: 'Clémence', numero: 14, matches: 0, points: 0, minutes: 0 },
-        { id: 11, prenom: 'Constance', numero: 15, matches: 0, points: 0, minutes: 0 }
+        { id: 1, prenom: 'Noémie', numero: 4, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 2, prenom: 'Ludivine', numero: 5, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 3, prenom: 'Marina', numero: 6, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 4, prenom: 'Emma', numero: 7, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 5, prenom: 'Lou-Ann', numero: 8, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 6, prenom: 'Julie C.', numero: 9, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 7, prenom: 'Mélanie', numero: 10, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 8, prenom: 'Sonia', numero: 11, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 9, prenom: 'Julie L.', numero: 12, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 10, prenom: 'Charlène', numero: 13, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 11, prenom: 'Clémence', numero: 14, matches: 0, points: 0, minutes: 0, fouls: 0 },
+        { id: 12, prenom: 'Constance', numero: 15, matches: 0, points: 0, minutes: 0, fouls: 0 }
     ];
 }
 
@@ -109,17 +110,18 @@ function initializeSampleData() {
             attackRanking: 3,
             defenseRanking: 7,
             playerStats: {
-                1: { points: 14, minutes: 32, played: true },
-                2: { points: 8, minutes: 28, played: true },
-                3: { points: 12, minutes: 30, played: true },
-                4: { points: 6, minutes: 25, played: true },
-                5: { points: 10, minutes: 22, played: true },
-                6: { points: 4, minutes: 18, played: true },
-                7: { points: 8, minutes: 20, played: true },
-                8: { points: 6, minutes: 15, played: true },
-                9: { points: 0, minutes: 10, played: true },
-                10: { points: 0, minutes: 0, played: false },
-                11: { points: 0, minutes: 0, played: false }
+                1: { points: 14, minutes: 32, played: true, fouls: 2 },
+                2: { points: 8, minutes: 28, played: true, fouls: 1 },
+                3: { points: 12, minutes: 30, played: true, fouls: 3 },
+                4: { points: 6, minutes: 25, played: true, fouls: 1 },
+                5: { points: 10, minutes: 22, played: true, fouls: 2 },
+                6: { points: 4, minutes: 18, played: true, fouls: 0 },
+                7: { points: 0, minutes: 0, played: false, fouls: 0 },
+                8: { points: 8, minutes: 20, played: true, fouls: 1 },
+                9: { points: 6, minutes: 15, played: true, fouls: 2 },
+                10: { points: 0, minutes: 10, played: true, fouls: 1 },
+                11: { points: 0, minutes: 0, played: false, fouls: 0 },
+                12: { points: 0, minutes: 0, played: false, fouls: 0 }
             }
         },
         {
@@ -136,17 +138,18 @@ function initializeSampleData() {
             attackRanking: 4,
             defenseRanking: 8,
             playerStats: {
-                1: { points: 12, minutes: 35, played: true },
-                2: { points: 10, minutes: 32, played: true },
-                3: { points: 8, minutes: 28, played: true },
-                4: { points: 9, minutes: 30, played: true },
-                5: { points: 6, minutes: 25, played: true },
-                6: { points: 4, minutes: 20, played: true },
-                7: { points: 6, minutes: 18, played: true },
-                8: { points: 0, minutes: 12, played: true },
-                9: { points: 0, minutes: 0, played: false },
-                10: { points: 0, minutes: 0, played: false },
-                11: { points: 0, minutes: 0, played: false }
+                1: { points: 12, minutes: 35, played: true, fouls: 3 },
+                2: { points: 10, minutes: 32, played: true, fouls: 2 },
+                3: { points: 8, minutes: 28, played: true, fouls: 1 },
+                4: { points: 9, minutes: 30, played: true, fouls: 2 },
+                5: { points: 6, minutes: 25, played: true, fouls: 1 },
+                6: { points: 4, minutes: 20, played: true, fouls: 0 },
+                7: { points: 0, minutes: 0, played: false, fouls: 0 },
+                8: { points: 6, minutes: 18, played: true, fouls: 1 },
+                9: { points: 0, minutes: 12, played: true, fouls: 2 },
+                10: { points: 0, minutes: 0, played: false, fouls: 0 },
+                11: { points: 0, minutes: 0, played: false, fouls: 0 },
+                12: { points: 0, minutes: 0, played: false, fouls: 0 }
             }
         },
         {
@@ -163,17 +166,18 @@ function initializeSampleData() {
             attackRanking: 2,
             defenseRanking: 6,
             playerStats: {
-                1: { points: 16, minutes: 30, played: true },
-                2: { points: 12, minutes: 28, played: true },
-                3: { points: 14, minutes: 32, played: true },
-                4: { points: 8, minutes: 26, played: true },
-                5: { points: 8, minutes: 24, played: true },
-                6: { points: 6, minutes: 22, played: true },
-                7: { points: 4, minutes: 18, played: true },
-                8: { points: 4, minutes: 16, played: true },
-                9: { points: 0, minutes: 4, played: true },
-                10: { points: 0, minutes: 0, played: false },
-                11: { points: 0, minutes: 0, played: false }
+                1: { points: 16, minutes: 30, played: true, fouls: 1 },
+                2: { points: 12, minutes: 28, played: true, fouls: 2 },
+                3: { points: 14, minutes: 32, played: true, fouls: 2 },
+                4: { points: 8, minutes: 26, played: true, fouls: 3 },
+                5: { points: 8, minutes: 24, played: true, fouls: 1 },
+                6: { points: 6, minutes: 22, played: true, fouls: 1 },
+                7: { points: 0, minutes: 0, played: false, fouls: 0 },
+                8: { points: 4, minutes: 18, played: true, fouls: 0 },
+                9: { points: 4, minutes: 16, played: true, fouls: 1 },
+                10: { points: 0, minutes: 4, played: true, fouls: 0 },
+                11: { points: 0, minutes: 0, played: false, fouls: 0 },
+                12: { points: 0, minutes: 0, played: false, fouls: 0 }
             }
         }
     ];
