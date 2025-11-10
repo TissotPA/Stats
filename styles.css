@@ -744,6 +744,19 @@ body {
     font-weight: 700;
     font-size: 1.1rem;
     color: #2d3748;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.recent-match-score.victoire {
+    background-color: #22c55e;
+    color: white;
+}
+
+.recent-match-score.defaite {
+    background-color: #ef4444;
+    color: white;
 }
 
 /* Performances récentes */

@@ -4,6 +4,17 @@ let matches = [];
 let currentTab = 'players';
 let editingMatchId = null; // ID du match en cours d'édition
 
+// Fonction utilitaire pour formater le score selon la convention domicile-extérieur
+function formatScore(match) {
+    if (match.location === 'domicile') {
+        // Domicile : notre score - score adversaire
+        return `${match.ourScore}-${match.opponentScore}`;
+    } else {
+        // Extérieur : score adversaire - notre score
+        return `${match.opponentScore}-${match.ourScore}`;
+    }
+}
+
 // Initialisation de l'application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Application en cours de chargement...');
@@ -285,7 +296,6 @@ function initializeEventListeners() {
     
     // Initialisation des graphiques
     initializeCharts();
-    initializePlayerCharts();
     
     console.log('Tous les événements ont été configurés');
 }
@@ -434,10 +444,10 @@ function updateRecentMatches() {
         return `
             <div class="recent-match ${match.result}">
                 <div class="recent-match-info">
-                    <div class="recent-match-opponent">${match.opponent}</div>
-                    <div class="recent-match-date">${formattedDate} - ${match.location === 'domicile' ? 'Domicile' : 'Extérieur'}</div>
+                    <div class="recent-match-opponent">${match.location === 'domicile' ? 'vs' : '@'} ${match.opponent}</div>
+                    <div class="recent-match-date">${formattedDate}</div>
                 </div>
-                <div class="recent-match-score">${match.ourScore}-${match.opponentScore}</div>
+                <div class="recent-match-score ${match.result}">${formatScore(match)}</div>
             </div>
         `;
     }).join('');
@@ -611,7 +621,7 @@ function updateDashboardChart() {
                             return [
                                 `vs ${match.opponent}`,
                                 `Résultat: ${match.result === 'victoire' ? 'Victoire' : 'Défaite'}`,
-                                `Score: ${match.ourScore}-${match.opponentScore}`
+                                `Score: ${formatScore(match)}`
                             ];
                         }
                     }
@@ -1858,7 +1868,7 @@ function renderMatches() {
         <div class="match-card" data-match-id="${match.id}">
             <div class="match-header" onclick="toggleMatchDetails(${match.id})">
                 <div class="match-opponent">
-                    <i class="fas fa-vs"></i> ${match.opponent}
+                    <i class="fas fa-vs"></i> ${match.location === 'domicile' ? 'vs' : '@'} ${match.opponent}
                 </div>
                 <div class="match-actions" onclick="event.stopPropagation()">
                     <button class="btn-icon btn-edit" onclick="editMatch(${match.id})" title="Modifier le match">
@@ -1878,12 +1888,9 @@ function renderMatches() {
                     <div class="match-detail-value">${formatDate(match.date)}</div>
                     <div class="match-detail-label">Date</div>
                 </div>
+
                 <div class="match-detail">
-                    <div class="match-detail-value">${match.location === 'domicile' ? 'Domicile' : 'Extérieur'}</div>
-                    <div class="match-detail-label">Lieu</div>
-                </div>
-                <div class="match-detail">
-                    <div class="match-detail-value">${match.ourScore} - ${match.opponentScore}</div>
+                    <div class="match-detail-value">${formatScore(match)}</div>
                     <div class="match-detail-label">Score</div>
                 </div>
                 <div class="match-detail">
@@ -2498,7 +2505,8 @@ function calculateChartData() {
     
     const labels = sortedMatches.map(match => {
         const date = new Date(match.date);
-        return `${date.getDate()}/${date.getMonth() + 1}`;
+        const locationPrefix = match.location === 'domicile' ? 'vs' : '@';
+        return [`${date.getDate()}/${date.getMonth() + 1}`, `${locationPrefix} ${match.opponent}`];
     });
     
     const datasets = [];
@@ -2621,7 +2629,7 @@ function calculateChartData() {
         }
     }
     
-    return { labels, datasets };
+    return { labels, datasets, sortedMatches };
 }
 
 // Mise à jour du graphique
@@ -2629,7 +2637,7 @@ function updateChart() {
     const ctx = document.getElementById('performanceChart');
     if (!ctx) return;
     
-    const { labels, datasets } = calculateChartData();
+    const { labels, datasets, sortedMatches } = calculateChartData();
     
     if (performanceChart) {
         performanceChart.destroy();
@@ -2646,6 +2654,14 @@ function updateChart() {
             title: {
                 display: true,
                 text: 'Matchs'
+            },
+            ticks: {
+                color: function(context) {
+                    const match = sortedMatches[context.index];
+                    return match && match.result === 'victoire' ? '#22c55e' : '#ef4444';
+                },
+                maxRotation: 0,
+                minRotation: 0
             }
         }
     };
@@ -2691,6 +2707,11 @@ function updateChart() {
                 text: 'Classement'
             },
             reverse: true,
+            min: 1,
+            max: 14,
+            ticks: {
+                stepSize: 1
+            },
             grid: {
                 color: 'rgba(0, 0, 0, 0.1)'
             }
@@ -2721,6 +2742,11 @@ function updateChart() {
             type: 'linear',
             display: false, // Caché mais utilisé pour l'échelle
             reverse: true,
+            min: 1,
+            max: 14,
+            ticks: {
+                stepSize: 1
+            },
             title: {
                 display: true,
                 text: 'Classement'
@@ -2737,6 +2763,11 @@ function updateChart() {
                 text: 'Classement'
             },
             reverse: true,
+            min: 1,
+            max: 14,
+            ticks: {
+                stepSize: 1
+            },
             grid: {
                 drawOnChartArea: false,
             }
@@ -2876,12 +2907,28 @@ function updateEvolutionChart() {
         return;
     }
     
+    // Récupérer les matchs joués pour les couleurs
+    const playedMatches = [...matches]
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .filter(match => {
+            const playerStats = match.playerStats[selectedPlayerId.toString()];
+            return playerStats && playerStats.played;
+        });
+    
     // Créer la configuration des échelles selon les statistiques sélectionnées
     const scales = {
         x: {
             title: {
                 display: true,
                 text: 'Matchs'
+            },
+            ticks: {
+                color: function(context) {
+                    const match = playedMatches[context.index];
+                    return match && match.result === 'victoire' ? '#22c55e' : '#ef4444';
+                },
+                maxRotation: 0,
+                minRotation: 0
             }
         }
     };
@@ -3060,7 +3107,8 @@ function calculateEvolutionData(playerId, selectedStats) {
     // Créer les labels seulement pour les matchs joués
     const labels = playedMatches.map(match => {
         const date = new Date(match.date);
-        return `${date.getDate()}/${date.getMonth() + 1} vs ${match.opponent}`;
+        const locationPrefix = match.location === 'domicile' ? 'vs' : '@';
+        return [`${date.getDate()}/${date.getMonth() + 1}`, `${locationPrefix} ${match.opponent}`];
     });
     
     const datasets = [];
