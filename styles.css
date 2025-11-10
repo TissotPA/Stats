@@ -491,6 +491,29 @@ body {
 .player-2-bg { background-color: rgba(49, 130, 206, 0.1); }
 .player-3-bg { background-color: rgba(56, 161, 105, 0.1); }
 
+/* Styles pour l'évolution comparative */
+.comparison-evolution-controls {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.comparison-evolution-chart-container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.comparison-evolution-chart-container canvas {
+    max-height: 500px;
+    width: 100% !important;
+}
+
 .stat-wide {
     grid-area: matches;
 }
@@ -940,6 +963,33 @@ body {
 }
 
 .evolution-chart-container canvas {
+    max-height: 400px;
+    width: 100% !important;
+}
+
+.evolution-radar-container {
+    margin: 30px 0;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.evolution-radar-container h3 {
+    margin: 0 0 20px 0;
+    color: #1a202c;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.radar-chart-wrapper {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
+
+.radar-chart-wrapper canvas {
     max-height: 400px;
     width: 100% !important;
 }
@@ -1817,6 +1867,19 @@ body {
         max-height: 300px;
     }
     
+    .evolution-radar-container {
+        margin: 20px 0;
+        padding: 15px;
+    }
+    
+    .radar-chart-wrapper {
+        height: 300px;
+    }
+    
+    .radar-chart-wrapper canvas {
+        max-height: 300px;
+    }
+
     .matches-table {
         font-size: 0.8rem;
     }
@@ -2032,6 +2095,19 @@ body {
     .match-details {
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
+    }
+    
+    /* Évolution comparative responsive */
+    .comparison-evolution-controls {
+        padding: 15px;
+    }
+    
+    .comparison-evolution-chart-container {
+        padding: 15px;
+    }
+    
+    .comparison-evolution-chart-container canvas {
+        max-height: 350px;
     }
 }
 

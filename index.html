@@ -209,6 +209,41 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Graphique d'évolution multi-joueuses -->
+                <div id="comparisonEvolutionSection" class="comparison-section" style="display: none;">
+                    <div class="section-header">
+                        <h3><i class="fas fa-chart-line"></i> Évolution comparative</h3>
+                    </div>
+                    
+                    <div class="comparison-evolution-controls">
+                        <div class="stats-selector">
+                            <label>Statistique à afficher :</label>
+                            <div class="stats-checkboxes">
+                                <div class="checkbox-group">
+                                    <input type="radio" name="comparison-stat" id="comparison-stat-points" value="points" checked>
+                                    <label for="comparison-stat-points">Points/match</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="radio" name="comparison-stat" id="comparison-stat-minutes" value="minutes">
+                                    <label for="comparison-stat-minutes">Minutes/match</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="radio" name="comparison-stat" id="comparison-stat-fouls" value="fouls">
+                                    <label for="comparison-stat-fouls">Fautes/match</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="radio" name="comparison-stat" id="comparison-stat-pointsPerMinute" value="pointsPerMinute">
+                                    <label for="comparison-stat-pointsPerMinute">Points/minute</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-evolution-chart-container">
+                        <canvas id="comparisonEvolutionChart"></canvas>
+                    </div>
+                </div>
             </section>
 
             <!-- Section Évolution individuelle -->
@@ -224,7 +259,16 @@
                             <option value="">-- Choisir une joueuse --</option>
                         </select>
                     </div>
-                    
+                </div>
+
+                <div class="evolution-radar-container" id="evolutionRadarContainer" style="display: none;">
+                    <h3>Profil de performance</h3>
+                    <div class="radar-chart-wrapper">
+                        <canvas id="evolutionRadarChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="evolution-controls">
                     <div class="stats-selector" id="statsSelector" style="display: none;">
                         <label>Statistiques à afficher :</label>
                         <div class="stats-checkboxes">

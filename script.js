@@ -333,6 +333,8 @@ function switchTab(tab) {
 // Variables globales pour le dashboard
 let dashboardChart = null;
 let comparisonRadarChart = null;
+let evolutionRadarChart = null;
+let comparisonEvolutionChart = null;
 let selectedPlayers = [];
 
 // Rendu du tableau de bord
@@ -815,6 +817,16 @@ function setupComparisonEventListeners() {
     } else {
         console.error('DEBUG: Bouton reset non trouvé');
     }
+    
+    // Événements pour les checkboxes d'évolution comparative
+    const comparisonEvolutionCheckboxes = document.querySelectorAll('#comparisonEvolutionSection input[type="checkbox"]');
+    comparisonEvolutionCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            if (selectedPlayers.length >= 2) {
+                updateComparisonEvolution();
+            }
+        });
+    });
 }
 
 // Gestion de la sélection d'une joueuse
@@ -899,6 +911,7 @@ function updateComparisonDisplay() {
     const messageElement = document.getElementById('comparisonMessage');
     const radarSection = document.getElementById('comparisonRadarSection');
     const tableSection = document.getElementById('comparisonTableSection');
+    const evolutionSection = document.getElementById('comparisonEvolutionSection');
     
     console.log('DEBUG: Éléments trouvés:', {
         message: !!messageElement,
@@ -927,6 +940,7 @@ function updateComparisonDisplay() {
         }
         if (radarSection) radarSection.style.display = 'none';
         if (tableSection) tableSection.style.display = 'none';
+        if (evolutionSection) evolutionSection.style.display = 'none';
     } else {
         // Comparaison possible
         console.log('DEBUG: Comparaison possible, génération des graphiques');
@@ -936,10 +950,12 @@ function updateComparisonDisplay() {
         }
         if (radarSection) radarSection.style.display = 'block';
         if (tableSection) tableSection.style.display = 'block';
+        if (evolutionSection) evolutionSection.style.display = 'block';
         
         // Générer les graphiques et tableaux
         updateComparisonRadar();
         updateComparisonTable();
+        updateComparisonEvolution();
     }
 }
 
@@ -1081,15 +1097,123 @@ function updateComparisonRadar() {
             return (value / maxTeamValue) * 100;
         });
         
-        const colors = ['#c53030', '#3182ce', '#38a169'];
+        const colors = ['#c53030', '#9333ea', '#38a169']; // Rouge, Violet, Vert (remplace bleu par violet)
+        
+        // Calculer les valeurs min/max pour chaque métrique sur TOUTE l'équipe
+        const teamMinMaxValues = metrics.map((metric, metricIndex) => {
+            const allTeamValues = players.map(p => {
+                switch (metric.key) {
+                    case 'matches':
+                        return p.matches || 0;
+                    case 'pointsPerMatch':
+                        return (p.matches > 0) ? (p.points || 0) / p.matches : 0;
+                    case 'minutesPerMatch':
+                        return (p.matches > 0) ? (p.minutes || 0) / p.matches : 0;
+                    case 'pointsPerMinute':
+                        return (p.minutes > 0) ? (p.points || 0) / p.minutes : 0;
+                    case 'points':
+                        return p.points || 0;
+                    case 'minutes':
+                        return p.minutes || 0;
+                    case 'foulsPerMatch':
+                        return (p.matches > 0) ? (p.fouls || 0) / p.matches : 0;
+                    case 'pointsRegularity':
+                        const pPointsMatches = matches.filter(match => 
+                            match.playerStats[p.id] && match.playerStats[p.id].played
+                        );
+                        const pPointsArray = pPointsMatches.map(match => match.playerStats[p.id].points);
+                        return calculateStandardDeviation(pPointsArray);
+                    case 'minutesRegularity':
+                        const pMinutesMatches = matches.filter(match => 
+                            match.playerStats[p.id] && match.playerStats[p.id].played
+                        );
+                        const pMinutesArray = pMinutesMatches.map(match => match.playerStats[p.id].minutes);
+                        return calculateStandardDeviation(pMinutesArray);
+                    case 'foulsRegularity':
+                        const pFoulsMatches = matches.filter(match => 
+                            match.playerStats[p.id] && match.playerStats[p.id].played
+                        );
+                        const pFoulsArray = pFoulsMatches.map(match => match.playerStats[p.id].fouls || 0);
+                        return calculateStandardDeviation(pFoulsArray);
+                    default:
+                        return 0;
+                }
+            });
+            return {
+                max: Math.max(...allTeamValues),
+                min: Math.min(...allTeamValues)
+            };
+        });
+        
+        // Calculer les leaders de chaque métrique pour ce radar
+        const leaders = calculateStatLeaders();
+        
+        // Créer un tableau de couleurs pour chaque point basé sur les vrais leaders/derniers
+        const pointColors = normalizedValues.map((value, metricIndex) => {
+            const metric = metrics[metricIndex];
+            const playerId = selectedPlayers[index].id;
+            
+            // Mapper les métriques du radar aux statistiques des leaders
+            let isLeader = false;
+            let isLast = false;
+            
+            switch (metric.key) {
+                case 'matches':
+                    isLeader = leaders.matches?.includes(playerId);
+                    isLast = leaders.matchesLast?.includes(playerId);
+                    break;
+                case 'pointsPerMatch':
+                    isLeader = leaders.pointsPerMatch?.includes(playerId);
+                    isLast = leaders.pointsPerMatchLast?.includes(playerId);
+                    break;
+                case 'minutesPerMatch':
+                    isLeader = leaders.minutesPerMatch?.includes(playerId);
+                    isLast = leaders.minutesPerMatchLast?.includes(playerId);
+                    break;
+                case 'pointsPerMinute':
+                    isLeader = leaders.pointsPerMinute?.includes(playerId);
+                    isLast = leaders.pointsPerMinuteLast?.includes(playerId);
+                    break;
+                case 'points':
+                    isLeader = leaders.points?.includes(playerId);
+                    isLast = leaders.pointsLast?.includes(playerId);
+                    break;
+                case 'minutes':
+                    isLeader = leaders.minutes?.includes(playerId);
+                    isLast = leaders.minutesLast?.includes(playerId);
+                    break;
+                case 'foulsPerMatch':
+                    // Pour les fautes, c'est inversé : leader = moins de fautes
+                    isLeader = leaders.foulsPerMatchLast?.includes(playerId);
+                    isLast = leaders.foulsPerMatch?.includes(playerId);
+                    break;
+                case 'pointsRegularity':
+                    // Pour la régularité, c'est inversé : leader = plus régulier (moins d'écart-type)
+                    isLeader = leaders.pointsRegularityLast?.includes(playerId);
+                    isLast = leaders.pointsRegularity?.includes(playerId);
+                    break;
+                case 'minutesRegularity':
+                    isLeader = leaders.minutesRegularityLast?.includes(playerId);
+                    isLast = leaders.minutesRegularity?.includes(playerId);
+                    break;
+                case 'foulsRegularity':
+                    isLeader = leaders.foulsRegularityLast?.includes(playerId);
+                    isLast = leaders.foulsRegularity?.includes(playerId);
+                    break;
+            }
+            
+            if (isLeader) return '#FFD700'; // Doré pour les vrais leaders
+            if (isLast) return '#3b82f6';   // Bleu pour les vrais derniers
+            return colors[index]; // Couleur normale
+        });
         
         return {
             label: player.prenom,
             data: normalizedValues,
             borderColor: colors[index],
             backgroundColor: colors[index] + '20',
-            pointBackgroundColor: colors[index],
-            pointBorderColor: colors[index],
+            pointBackgroundColor: pointColors,
+            pointBorderColor: pointColors,
             pointBorderWidth: 2,
             pointRadius: 4
         };
@@ -1304,6 +1428,140 @@ function calculatePlayerPreviousStats(playerId) {
         previousMinutesPerMatch,
         previousPointsPerMinute
     };
+}
+
+// Mettre à jour le graphique d'évolution comparative
+function updateComparisonEvolution() {
+    const ctx = document.getElementById('comparisonEvolutionChart');
+    if (!ctx || selectedPlayers.length < 2) return;
+    
+    // Détruire le graphique existant
+    if (comparisonEvolutionChart) {
+        comparisonEvolutionChart.destroy();
+    }
+    
+    // Obtenir la statistique sélectionnée par radio button
+    const selectedRadio = document.querySelector('#comparisonEvolutionSection input[type="radio"]:checked');
+    
+    if (!selectedRadio) {
+        return; // Aucune statistique sélectionnée
+    }
+    
+    const selectedStat = selectedRadio.value;
+    
+    // Calculer les données d'évolution pour chaque joueuse sélectionnée
+    const datasets = [];
+    const colors = ['#c53030', '#9333ea', '#38a169']; // Rouge, Violet, Vert
+    let allValues = []; // Pour calculer l'échelle optimale
+    
+    selectedPlayers.forEach((player, playerIndex) => {
+        const evolutionData = calculateEvolutionData(player.id, [selectedStat]);
+        
+        if (evolutionData.datasets.length > 0) {
+            const dataset = evolutionData.datasets[0];
+            
+            // Collecter toutes les valeurs pour l'échelle
+            allValues = allValues.concat(dataset.data.filter(val => val !== null && val !== undefined));
+            
+            // Personnaliser les couleurs et labels
+            const baseColor = colors[playerIndex] || '#999999';
+            const playerName = player.prenom;
+            
+            datasets.push({
+                ...dataset,
+                label: playerName,
+                borderColor: baseColor,
+                backgroundColor: baseColor + '20',
+                pointBackgroundColor: baseColor,
+                pointBorderColor: baseColor,
+                yAxisID: 'y' // Un seul axe Y
+            });
+        }
+    });
+    
+    // Obtenir les labels (dates + adversaires) du premier joueur
+    const firstPlayerData = calculateEvolutionData(selectedPlayers[0].id, [selectedStat]);
+    const labels = firstPlayerData.labels || [];
+    
+    // Calculer l'échelle optimale basée sur la statistique sélectionnée et les valeurs
+    let yAxisConfig = {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        min: 0,
+        title: {
+            display: true,
+            text: getStatLabel(selectedStat)
+        }
+    };
+    
+    // Adapter l'échelle selon la statistique
+    const maxValue = Math.max(...allValues, 0);
+    switch(selectedStat) {
+        case 'points':
+            yAxisConfig.max = Math.max(20, Math.ceil(maxValue + 2));
+            break;
+        case 'minutes':
+            yAxisConfig.max = Math.max(40, Math.ceil(maxValue + 5));
+            break;
+        case 'fouls':
+            yAxisConfig.max = 5;
+            break;
+        case 'pointsPerMinute':
+            yAxisConfig.max = Math.max(0.5, Math.ceil((maxValue + 0.1) * 10) / 10);
+            yAxisConfig.ticks = { stepSize: 0.1 };
+            break;
+        default:
+            yAxisConfig.max = Math.ceil(maxValue + maxValue * 0.1);
+    }
+    
+    const yAxes = { y: yAxisConfig };
+    
+    comparisonEvolutionChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Évolution comparative des performances',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: yAxes,
+            elements: {
+                point: {
+                    radius: 4,
+                    hoverRadius: 8
+                },
+                line: {
+                    tension: 0.1
+                }
+            }
+        }
+    });
+}
+
+// Fonction utilitaire pour obtenir le label d'une statistique
+function getStatLabel(statType) {
+    switch(statType) {
+        case 'points': return 'Points/match';
+        case 'minutes': return 'Minutes/match';
+        case 'fouls': return 'Fautes/match';
+        case 'pointsPerMinute': return 'Points/minute';
+        default: return statType;
+    }
 }
 
 // Fonction pour calculer les leaders de chaque statistique (podium complet)
@@ -2496,6 +2754,12 @@ function initializeCharts() {
         checkbox.addEventListener('change', updateChart);
     });
     
+    // Initialisation de l'évolution comparative
+    const comparisonRadios = document.querySelectorAll('#comparisonEvolutionSection .stats-checkboxes input[type="radio"]');
+    comparisonRadios.forEach(radio => {
+        radio.addEventListener('change', updateComparisonEvolution);
+    });
+    
     updateChart();
 }
 
@@ -2861,13 +3125,17 @@ function onEvolutionPlayerChange() {
     const chartContainer = document.getElementById('evolutionChartContainer');
     const matchesContainer = document.getElementById('evolutionMatches');
     
+    const radarContainer = document.getElementById('evolutionRadarContainer');
+    
     if (selectedPlayerId) {
         statsSelector.style.display = 'block';
         updateEvolutionChart();
+        updateEvolutionRadar();
         updateEvolutionMatchesTable();
     } else {
         statsSelector.style.display = 'none';
         chartContainer.style.display = 'none';
+        radarContainer.style.display = 'none';
         matchesContainer.style.display = 'none';
     }
 }
@@ -3183,6 +3451,301 @@ function calculateEvolutionData(playerId, selectedStats) {
     return { labels, datasets, maxPoints, maxPointsPerMinute };
 }
 
+// Mettre à jour le graphique radar d'évolution individuelle
+function updateEvolutionRadar() {
+    const playerSelect = document.getElementById('evolutionPlayerSelect');
+    const selectedPlayerId = playerSelect ? playerSelect.value : '';
+    const radarContainer = document.getElementById('evolutionRadarContainer');
+    
+    if (!selectedPlayerId) {
+        if (radarContainer) radarContainer.style.display = 'none';
+        return;
+    }
+    
+    if (!radarContainer) {
+        return;
+    }
+    
+    if (!players || players.length === 0) {
+        radarContainer.style.display = 'none';
+        return;
+    }
+    
+    const ctx = document.getElementById('evolutionRadarChart');
+    
+    if (!ctx) {
+        return;
+    }
+    
+    // Trouver la joueuse sélectionnée (avec gestion des types)
+    let selectedPlayer = players.find(p => p.id === selectedPlayerId);
+    
+    if (!selectedPlayer) {
+        // Essayer avec conversion de type (string vs number)
+        selectedPlayer = players.find(p => String(p.id) === String(selectedPlayerId));
+        
+        if (!selectedPlayer) {
+            radarContainer.style.display = 'none';
+            return;
+        }
+    }
+    
+    // Afficher le conteneur
+    radarContainer.style.display = 'block';
+    
+    // Détruire le graphique existant
+    if (evolutionRadarChart) {
+        evolutionRadarChart.destroy();
+    }
+    
+    // Petit délai pour s'assurer que le DOM est mis à jour
+    setTimeout(() => {
+        createEvolutionRadarChart(selectedPlayer, ctx);
+    }, 10);
+}
+
+function createEvolutionRadarChart(selectedPlayer, ctx) {
+    // Vérifier que Chart.js est disponible
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js not loaded');
+        return;
+    }
+    
+    // Définir les métriques (similaires au radar de comparaison mais adaptées)
+    const metrics = [
+        { label: 'Matchs joués', key: 'matches' },
+        { label: 'Points/match', key: 'pointsPerMatch' },
+        { label: 'Minutes/match', key: 'minutesPerMatch' },
+        { label: 'Points/minute', key: 'pointsPerMinute' },
+        { label: 'Points totaux', key: 'points' },
+        { label: 'Minutes totales', key: 'minutes' },
+        { label: 'Fautes/match', key: 'foulsPerMatch' },
+        { label: 'Régularité pts.', key: 'pointsRegularity' },
+        { label: 'Régularité min.', key: 'minutesRegularity' },
+        { label: 'Régularité fautes', key: 'foulsRegularity' }
+    ];
+    
+    // Calculer les valeurs pour la joueuse sélectionnée
+    const playerValues = metrics.map(metric => {
+        let value = 0;
+        switch (metric.key) {
+            case 'matches':
+                value = selectedPlayer.matches || 0;
+                break;
+            case 'pointsPerMatch':
+                value = (selectedPlayer.matches > 0) ? (selectedPlayer.points || 0) / selectedPlayer.matches : 0;
+                break;
+            case 'minutesPerMatch':
+                value = (selectedPlayer.matches > 0) ? (selectedPlayer.minutes || 0) / selectedPlayer.matches : 0;
+                break;
+            case 'pointsPerMinute':
+                value = (selectedPlayer.minutes > 0) ? (selectedPlayer.points || 0) / selectedPlayer.minutes : 0;
+                break;
+            case 'points':
+                value = selectedPlayer.points || 0;
+                break;
+            case 'minutes':
+                value = selectedPlayer.minutes || 0;
+                break;
+            case 'foulsPerMatch':
+                value = (selectedPlayer.matches > 0) ? (selectedPlayer.fouls || 0) / selectedPlayer.matches : 0;
+                break;
+            case 'pointsRegularity':
+                const playerPointsMatches = matches.filter(match => 
+                    match.playerStats[selectedPlayer.id] && match.playerStats[selectedPlayer.id].played
+                );
+                const pointsArray = playerPointsMatches.map(match => match.playerStats[selectedPlayer.id].points);
+                value = calculateStandardDeviation(pointsArray);
+                break;
+            case 'minutesRegularity':
+                const playerMinutesMatches = matches.filter(match => 
+                    match.playerStats[selectedPlayer.id] && match.playerStats[selectedPlayer.id].played
+                );
+                const minutesArray = playerMinutesMatches.map(match => match.playerStats[selectedPlayer.id].minutes);
+                value = calculateStandardDeviation(minutesArray);
+                break;
+            case 'foulsRegularity':
+                const playerFoulsMatches = matches.filter(match => 
+                    match.playerStats[selectedPlayer.id] && match.playerStats[selectedPlayer.id].played
+                );
+                const foulsArray = playerFoulsMatches.map(match => match.playerStats[selectedPlayer.id].fouls || 0);
+                value = calculateStandardDeviation(foulsArray);
+                break;
+        }
+        return value;
+    });
+    
+    // Normaliser les valeurs par rapport à toute l'équipe
+    const normalizedValues = playerValues.map((value, metricIndex) => {
+        // Calculer les valeurs pour TOUTE l'équipe
+        const allTeamValues = players.map(p => {
+            switch (metrics[metricIndex].key) {
+                case 'matches':
+                    return p.matches || 0;
+                case 'pointsPerMatch':
+                    return (p.matches > 0) ? (p.points || 0) / p.matches : 0;
+                case 'minutesPerMatch':
+                    return (p.matches > 0) ? (p.minutes || 0) / p.matches : 0;
+                case 'pointsPerMinute':
+                    return (p.minutes > 0) ? (p.points || 0) / p.minutes : 0;
+                case 'points':
+                    return p.points || 0;
+                case 'minutes':
+                    return p.minutes || 0;
+                case 'foulsPerMatch':
+                    return (p.matches > 0) ? (p.fouls || 0) / p.matches : 0;
+                case 'pointsRegularity':
+                    const pPointsMatches = matches.filter(match => 
+                        match.playerStats[p.id] && match.playerStats[p.id].played
+                    );
+                    const pPointsArray = pPointsMatches.map(match => match.playerStats[p.id].points);
+                    return calculateStandardDeviation(pPointsArray);
+                case 'minutesRegularity':
+                    const pMinutesMatches = matches.filter(match => 
+                        match.playerStats[p.id] && match.playerStats[p.id].played
+                    );
+                    const pMinutesArray = pMinutesMatches.map(match => match.playerStats[p.id].minutes);
+                    return calculateStandardDeviation(pMinutesArray);
+                case 'foulsRegularity':
+                    const pFoulsMatches = matches.filter(match => 
+                        match.playerStats[p.id] && match.playerStats[p.id].played
+                    );
+                    const pFoulsArray = pFoulsMatches.map(match => match.playerStats[p.id].fouls || 0);
+                    return calculateStandardDeviation(pFoulsArray);
+                default:
+                    return 0;
+            }
+        });
+        
+        const maxTeamValue = Math.max(...allTeamValues);
+        const minTeamValue = Math.min(...allTeamValues);
+        
+        // Pour les fautes et la régularité, on inverse la logique (moins = meilleur)
+        if (metrics[metricIndex].key === 'foulsPerMatch') {
+            const maxFouls = 5;
+            return Math.max(0, ((maxFouls - value) / maxFouls) * 100);
+        }
+        
+        if (metrics[metricIndex].key === 'pointsRegularity' || metrics[metricIndex].key === 'minutesRegularity' || metrics[metricIndex].key === 'foulsRegularity') {
+            if (maxTeamValue === 0) return 100;
+            return Math.max(0, ((maxTeamValue - value) / maxTeamValue) * 100);
+        }
+        
+        // Pour les autres stats : normalisation classique sur l'équipe
+        if (maxTeamValue === 0) return 0;
+        return (value / maxTeamValue) * 100;
+    });
+    
+    // Calculer les leaders pour déterminer les couleurs exactes
+    const leaders = calculateStatLeaders();
+    
+    // Créer les couleurs des points basées sur les vrais leaders/derniers
+    const pointColors = normalizedValues.map((value, metricIndex) => {
+        const metric = metrics[metricIndex];
+        const playerId = selectedPlayer.id;
+        
+        // Mapper les métriques du radar aux statistiques des leaders
+        let isLeader = false;
+        let isLast = false;
+        
+        switch (metric.key) {
+            case 'matches':
+                isLeader = leaders.matches?.includes(playerId);
+                isLast = leaders.matchesLast?.includes(playerId);
+                break;
+            case 'pointsPerMatch':
+                isLeader = leaders.pointsPerMatch?.includes(playerId);
+                isLast = leaders.pointsPerMatchLast?.includes(playerId);
+                break;
+            case 'minutesPerMatch':
+                isLeader = leaders.minutesPerMatch?.includes(playerId);
+                isLast = leaders.minutesPerMatchLast?.includes(playerId);
+                break;
+            case 'pointsPerMinute':
+                isLeader = leaders.pointsPerMinute?.includes(playerId);
+                isLast = leaders.pointsPerMinuteLast?.includes(playerId);
+                break;
+            case 'points':
+                isLeader = leaders.points?.includes(playerId);
+                isLast = leaders.pointsLast?.includes(playerId);
+                break;
+            case 'minutes':
+                isLeader = leaders.minutes?.includes(playerId);
+                isLast = leaders.minutesLast?.includes(playerId);
+                break;
+            case 'foulsPerMatch':
+                // Pour les fautes, c'est inversé : leader = moins de fautes
+                isLeader = leaders.foulsPerMatchLast?.includes(playerId);
+                isLast = leaders.foulsPerMatch?.includes(playerId);
+                break;
+            case 'pointsRegularity':
+                // Pour la régularité dans le radar :
+                // - Plus régulier (moins d'écart-type) = point extérieur = DORÉ
+                // - Moins régulier (plus d'écart-type) = point intérieur = BLEU
+                // CORRECTION : Dans leaders, "pointsRegularity" = les MEILLEURS (moins d'écart-type)
+                isLeader = leaders.pointsRegularity?.includes(playerId);     // Les plus réguliers (moins d'écart-type)
+                isLast = leaders.pointsRegularityLast?.includes(playerId);   // Les moins réguliers (plus d'écart-type)
+                break;
+            case 'minutesRegularity':
+                isLeader = leaders.minutesRegularity?.includes(playerId);
+                isLast = leaders.minutesRegularityLast?.includes(playerId);
+                break;
+            case 'foulsRegularity':
+                isLeader = leaders.foulsRegularity?.includes(playerId);
+                isLast = leaders.foulsRegularityLast?.includes(playerId);
+                break;
+        }
+        
+        if (isLeader) return '#FFD700'; // Doré pour les vrais leaders
+        if (isLast) return '#3b82f6';   // Bleu pour les vrais derniers
+        return '#c53030'; // Rouge pour les autres valeurs
+    });
+    
+    // Créer le graphique
+    evolutionRadarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: metrics.map(m => m.label),
+            datasets: [{
+                label: selectedPlayer.prenom,
+                data: normalizedValues,
+                borderColor: '#c53030',
+                backgroundColor: '#c5303020',
+                pointBackgroundColor: pointColors,
+                pointBorderColor: pointColors,
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Profil de ${selectedPlayer.prenom} (par rapport à l'équipe)`,
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20
+                    }
+                }
+            }
+        }
+    });
+}
+
 // Mettre à jour la table des matchs pour l'évolution
 function updateEvolutionMatchesTable() {
     const playerSelect = document.getElementById('evolutionPlayerSelect');
@@ -3269,4 +3832,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialiser le dashboard par défaut
     switchTab('dashboard');
     console.log('Application initialisée avec succès');
+    
+
 });
