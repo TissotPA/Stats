@@ -17,13 +17,20 @@ function formatScore(match) {
 
 // Initialisation de l'application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Application en cours de chargement...');
+    console.log('=== APPLICATION EN COURS DE CHARGEMENT ===');
+    
+    // Test des éléments DOM critiques
+    setTimeout(() => {
+        console.log('Test bouton Charger:', document.getElementById('loadBtn') ? 'TROUVÉ' : 'MANQUANT');
+        console.log('Test bouton Exporter:', document.getElementById('exportBtn') ? 'TROUVÉ' : 'MANQUANT');
+    }, 100);
+    
     loadDataFromStorage();
     initializeEventListeners();
     renderPlayers();
     renderTeamStats();
     renderMatches();
-    console.log('Application chargée avec succès !');
+    console.log('=== APPLICATION CHARGÉE AVEC SUCCÈS ===');
 });
 
 // Gestion du stockage local
@@ -255,8 +262,14 @@ function initializeEventListeners() {
     // Boutons de gestion des données
     const loadBtn = document.getElementById('loadBtn');
     if (loadBtn) {
-        loadBtn.addEventListener('click', loadStatsJson);
-        console.log('Bouton "Charger" configuré');
+        loadBtn.addEventListener('click', function(e) {
+            console.log('CLIC sur bouton Charger détecté !');
+            e.preventDefault();
+            loadStatsJson();
+        });
+        console.log('Bouton "Charger" configuré avec succès');
+    } else {
+        console.error('ERREUR: Bouton loadBtn introuvable lors de l\'initialisation !');
     }
     
     const exportBtn = document.getElementById('exportBtn');
