@@ -1,0 +1,734 @@
+{
+  "players": [
+    {
+      "id": 1,
+      "prenom": "Noémie",
+      "numero": 4,
+      "matches": 4,
+      "points": 29,
+      "minutes": 85,
+      "fouls": 12
+    },
+    {
+      "id": 2,
+      "prenom": "Ludivine",
+      "numero": 5,
+      "matches": 5,
+      "points": 49,
+      "minutes": 125,
+      "fouls": 12
+    },
+    {
+      "id": 3,
+      "prenom": "Marina",
+      "numero": 6,
+      "matches": 3,
+      "points": 20,
+      "minutes": 74,
+      "fouls": 5
+    },
+    {
+      "id": 4,
+      "prenom": "Emma",
+      "numero": 7,
+      "matches": 3,
+      "points": 27,
+      "minutes": 90,
+      "fouls": 9
+    },
+    {
+      "id": 5,
+      "prenom": "Lou-Ann",
+      "numero": 8,
+      "matches": 3,
+      "points": 20,
+      "minutes": 65,
+      "fouls": 11
+    },
+    {
+      "id": 6,
+      "prenom": "Julie C.",
+      "numero": 9,
+      "matches": 5,
+      "points": 38,
+      "minutes": 84,
+      "fouls": 6
+    },
+    {
+      "id": 7,
+      "prenom": "Mélanie",
+      "numero": 10,
+      "matches": 0,
+      "points": 2,
+      "minutes": 22,
+      "fouls": 1
+    },
+    {
+      "id": 8,
+      "prenom": "Sonia",
+      "numero": 11,
+      "matches": 4,
+      "points": 22,
+      "minutes": 77,
+      "fouls": 12
+    },
+    {
+      "id": 9,
+      "prenom": "Julie L.",
+      "numero": 12,
+      "matches": 5,
+      "points": 38,
+      "minutes": 130,
+      "fouls": 7
+    },
+    {
+      "id": 10,
+      "prenom": "Charlène",
+      "numero": 13,
+      "matches": 4,
+      "points": 28,
+      "minutes": 105,
+      "fouls": 8
+    },
+    {
+      "id": 11,
+      "prenom": "Clémence",
+      "numero": 14,
+      "matches": 5,
+      "points": 24,
+      "minutes": 92,
+      "fouls": 16
+    },
+    {
+      "id": 12,
+      "prenom": "Constance",
+      "numero": 15,
+      "matches": 5,
+      "points": 14,
+      "minutes": 96,
+      "fouls": 8
+    }
+  ],
+  "matches": [
+    {
+      "id": 1761834829501,
+      "opponent": "Le Cergne",
+      "date": "2025-09-21",
+      "location": "exterieur",
+      "result": "victoire",
+      "ourScore": 49,
+      "opponentScore": 45,
+      "freeThrowsMade": 18,
+      "freeThrowsAttempted": 38,
+      "ranking": 1,
+      "attackRanking": 5,
+      "defenseRanking": 6,
+      "playerStats": {
+        "1": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "2": {
+          "points": 7,
+          "minutes": 36,
+          "fouls": 3,
+          "played": true
+        },
+        "3": {
+          "points": 12,
+          "minutes": 32,
+          "fouls": 2,
+          "played": true
+        },
+        "4": {
+          "points": 0,
+          "minutes": 27,
+          "fouls": 4,
+          "played": true
+        },
+        "5": {
+          "points": 10,
+          "minutes": 29,
+          "fouls": 4,
+          "played": true
+        },
+        "6": {
+          "points": 0,
+          "minutes": 10,
+          "fouls": 1,
+          "played": true
+        },
+        "7": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "8": {
+          "points": 5,
+          "minutes": 23,
+          "fouls": 5,
+          "played": true
+        },
+        "9": {
+          "points": 6,
+          "minutes": 29,
+          "fouls": 2,
+          "played": true
+        },
+        "10": {
+          "points": 7,
+          "minutes": 40,
+          "fouls": 2,
+          "played": true
+        },
+        "11": {
+          "points": 2,
+          "minutes": 11,
+          "fouls": 5,
+          "played": true
+        },
+        "12": {
+          "points": 0,
+          "minutes": 13,
+          "fouls": 3,
+          "played": true
+        }
+      }
+    },
+    {
+      "id": 1761836774581,
+      "opponent": "Perreux",
+      "date": "2025-09-27",
+      "location": "domicile",
+      "result": "victoire",
+      "ourScore": 61,
+      "opponentScore": 47,
+      "freeThrowsMade": 11,
+      "freeThrowsAttempted": 18,
+      "ranking": 1,
+      "attackRanking": 5,
+      "defenseRanking": 5,
+      "playerStats": {
+        "1": {
+          "points": 6,
+          "minutes": 20,
+          "fouls": 3,
+          "played": true
+        },
+        "2": {
+          "points": 8,
+          "minutes": 21,
+          "fouls": 3,
+          "played": true
+        },
+        "3": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "4": {
+          "points": 10,
+          "minutes": 20,
+          "fouls": 0,
+          "played": true
+        },
+        "5": {
+          "points": 3,
+          "minutes": 19,
+          "fouls": 2,
+          "played": true
+        },
+        "6": {
+          "points": 3,
+          "minutes": 15,
+          "fouls": 2,
+          "played": true
+        },
+        "7": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "8": {
+          "points": 8,
+          "minutes": 20,
+          "fouls": 2,
+          "played": true
+        },
+        "9": {
+          "points": 7,
+          "minutes": 26,
+          "fouls": 1,
+          "played": true
+        },
+        "10": {
+          "points": 11,
+          "minutes": 22,
+          "fouls": 1,
+          "played": true
+        },
+        "11": {
+          "points": 3,
+          "minutes": 15,
+          "fouls": 3,
+          "played": true
+        },
+        "12": {
+          "points": 2,
+          "minutes": 20,
+          "fouls": 1,
+          "played": true
+        }
+      }
+    },
+    {
+      "id": 1761837542253,
+      "opponent": "St Héand",
+      "date": "2025-10-04",
+      "location": "exterieur",
+      "result": "victoire",
+      "ourScore": 67,
+      "opponentScore": 38,
+      "freeThrowsMade": 13,
+      "freeThrowsAttempted": 19,
+      "ranking": 1,
+      "attackRanking": 4,
+      "defenseRanking": 2,
+      "excludeIndividualStats": true,
+      "playerStats": {
+        "1": {
+          "points": 10,
+          "minutes": 20,
+          "fouls": 0,
+          "played": true
+        },
+        "2": {
+          "points": 10,
+          "minutes": 20,
+          "fouls": 4,
+          "played": true
+        },
+        "3": {
+          "points": 14,
+          "minutes": 20,
+          "fouls": 1,
+          "played": true
+        },
+        "4": {
+          "points": 13,
+          "minutes": 20,
+          "fouls": 5,
+          "played": true
+        },
+        "5": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "6": {
+          "points": 6,
+          "minutes": 20,
+          "fouls": 1,
+          "played": true
+        },
+        "7": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "8": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "9": {
+          "points": 3,
+          "minutes": 20,
+          "fouls": 0,
+          "played": true
+        },
+        "10": {
+          "points": 0,
+          "minutes": 20,
+          "fouls": 5,
+          "played": true
+        },
+        "11": {
+          "points": 7,
+          "minutes": 20,
+          "fouls": 3,
+          "played": true
+        },
+        "12": {
+          "points": 4,
+          "minutes": 20,
+          "fouls": 2,
+          "played": true
+        }
+      }
+    },
+    {
+      "id": 1761837606414,
+      "opponent": "La Séauve",
+      "date": "2025-10-11",
+      "location": "domicile",
+      "result": "victoire",
+      "ourScore": 77,
+      "opponentScore": 62,
+      "freeThrowsMade": 10,
+      "freeThrowsAttempted": 16,
+      "ranking": 1,
+      "attackRanking": 3,
+      "defenseRanking": 2,
+      "playerStats": {
+        "1": {
+          "points": 9,
+          "minutes": 24,
+          "fouls": 4,
+          "played": true
+        },
+        "2": {
+          "points": 12,
+          "minutes": 26,
+          "fouls": 2,
+          "played": true
+        },
+        "3": {
+          "points": 8,
+          "minutes": 19,
+          "fouls": 1,
+          "played": true
+        },
+        "4": {
+          "points": 12,
+          "minutes": 28,
+          "fouls": 3,
+          "played": true
+        },
+        "5": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "6": {
+          "points": 17,
+          "minutes": 18,
+          "fouls": 2,
+          "played": true
+        },
+        "7": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "8": {
+          "points": 2,
+          "minutes": 15,
+          "fouls": 4,
+          "played": true
+        },
+        "9": {
+          "points": 3,
+          "minutes": 28,
+          "fouls": 0,
+          "played": true
+        },
+        "10": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "11": {
+          "points": 8,
+          "minutes": 24,
+          "fouls": 2,
+          "played": true
+        },
+        "12": {
+          "points": 6,
+          "minutes": 18,
+          "fouls": 1,
+          "played": true
+        }
+      }
+    },
+    {
+      "id": 1761837663795,
+      "opponent": "Crémeaux",
+      "date": "2025-10-18",
+      "location": "domicile",
+      "result": "victoire",
+      "ourScore": 75,
+      "opponentScore": 38,
+      "freeThrowsMade": 5,
+      "freeThrowsAttempted": 9,
+      "ranking": 1,
+      "attackRanking": 2,
+      "defenseRanking": 2,
+      "playerStats": {
+        "1": {
+          "points": 8,
+          "minutes": 20,
+          "fouls": 1,
+          "played": true
+        },
+        "2": {
+          "points": 10,
+          "minutes": 17,
+          "fouls": 1,
+          "played": true
+        },
+        "3": {
+          "points": 0,
+          "minutes": 23,
+          "fouls": 2,
+          "played": true
+        },
+        "4": {
+          "points": 5,
+          "minutes": 15,
+          "fouls": 2,
+          "played": true
+        },
+        "5": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "6": {
+          "points": 16,
+          "minutes": 22,
+          "fouls": 1,
+          "played": true
+        },
+        "7": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "8": {
+          "points": 7,
+          "minutes": 19,
+          "fouls": 1,
+          "played": true
+        },
+        "9": {
+          "points": 9,
+          "minutes": 15,
+          "fouls": 1,
+          "played": true
+        },
+        "10": {
+          "points": 8,
+          "minutes": 22,
+          "fouls": 2,
+          "played": true
+        },
+        "11": {
+          "points": 10,
+          "minutes": 23,
+          "fouls": 2,
+          "played": true
+        },
+        "12": {
+          "points": 2,
+          "minutes": 22,
+          "fouls": 1,
+          "played": true
+        }
+      }
+    },
+    {
+      "id": 1762771456171,
+      "opponent": "Saint Denis de Cabanne",
+      "date": "2025-11-08",
+      "location": "exterieur",
+      "result": "victoire",
+      "ourScore": 49,
+      "opponentScore": 39,
+      "freeThrowsMade": 9,
+      "freeThrowsAttempted": 22,
+      "ranking": 1,
+      "attackRanking": 2,
+      "defenseRanking": 1,
+      "playerStats": {
+        "1": {
+          "points": 6,
+          "minutes": 21,
+          "fouls": 4,
+          "played": true
+        },
+        "2": {
+          "points": 12,
+          "minutes": 25,
+          "fouls": 3,
+          "played": true
+        },
+        "3": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "4": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "5": {
+          "points": 7,
+          "minutes": 17,
+          "fouls": 5,
+          "played": true
+        },
+        "6": {
+          "points": 2,
+          "minutes": 19,
+          "fouls": 0,
+          "played": true
+        },
+        "7": {
+          "points": 2,
+          "minutes": 22,
+          "fouls": 1,
+          "played": true
+        },
+        "8": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "9": {
+          "points": 13,
+          "minutes": 32,
+          "fouls": 3,
+          "played": true
+        },
+        "10": {
+          "points": 2,
+          "minutes": 21,
+          "fouls": 3,
+          "played": true
+        },
+        "11": {
+          "points": 1,
+          "minutes": 19,
+          "fouls": 4,
+          "played": true
+        },
+        "12": {
+          "points": 4,
+          "minutes": 23,
+          "fouls": 2,
+          "played": true
+        }
+      }
+    },
+    {
+      "id": 1763386108866,
+      "opponent": "Saint Romain le Puy",
+      "date": "2025-11-16",
+      "location": "exterieur",
+      "result": "victoire",
+      "ourScore": 65,
+      "opponentScore": 44,
+      "freeThrowsMade": 4,
+      "freeThrowsAttempted": 13,
+      "ranking": 1,
+      "attackRanking": 2,
+      "defenseRanking": 1,
+      "excludeIndividualStats": true,
+      "playerStats": {
+        "1": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": true
+        },
+        "2": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": true
+        },
+        "3": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": true
+        },
+        "4": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "5": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": true
+        },
+        "6": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": true
+        },
+        "7": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": false
+        },
+        "8": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": true
+        },
+        "9": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": true
+        },
+        "10": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": true
+        },
+        "11": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": true
+        },
+        "12": {
+          "points": 0,
+          "minutes": 0,
+          "fouls": 0,
+          "played": true
+        }
+      }
+    }
+  ],
+  "exportDate": "2025-11-17T13:56:43.752Z",
+  "version": "1.0"
+}
